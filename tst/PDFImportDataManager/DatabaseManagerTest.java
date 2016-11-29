@@ -8,7 +8,9 @@ import org.junit.Test;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.Assert.*;
@@ -20,6 +22,8 @@ public class DatabaseManagerTest {
     @Before
     public void setUp() throws Exception {
         //Files.copy("./tst/testDatabase.db", "./tst/tempDB.db", REPLACE_EXISTING);
+
+        //testSQLiteDB.createDatabase("./tst/tempDB.db");
         assertEquals(true, testSQLiteDB.openDatabase("./tst/tempDB.db"));
     }
 
@@ -44,12 +48,15 @@ public class DatabaseManagerTest {
         //TODO add code to re-add entry?
     }
 
+
     @Test
     public void TestAddEntry() throws Exception {
         int prevSize = testSQLiteDB.getEntryList().size();
-        List entry = new ArrayList<String>();
-        entry.add("test");
-        testSQLiteDB.addEntry(entry);
+        List<Map> entryList = new ArrayList<>();
+        Map<String, Integer> entry = new HashMap<String, Integer>();
+        entry.put("",0);
+        entryList.add(entry);
+        testSQLiteDB.addEntry(entryList);
     }
 
     @After

@@ -3,6 +3,7 @@ package PDFImportDataManager;
 
 import java.sql.Connection;
 import java.util.List;
+import java.util.Map;
 
 
 public interface DatabaseManager {
@@ -12,10 +13,15 @@ public interface DatabaseManager {
     public boolean createDatabase(String DBFile);
     public boolean openDatabase(String DBFile);
     public List<String> getEntryList();
-    public List<String> getEntryInfo(String entryID);
-    public List<String> getEntry(String entryID);
-    public void removeEntry(String entryID);
-    public boolean addEntry(List<String> data);
+
+    //
+    public Map getEntryInfo(String entryID);
+    public Map getCompanyInfo();
+    public List<Map> getEntry(String entryID);
+    public boolean removeEntry(String entryID);
+
+    public boolean addEntry(List<Map> data);
+    //Format:
 
 
 }

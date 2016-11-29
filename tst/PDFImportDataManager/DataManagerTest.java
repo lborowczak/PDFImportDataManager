@@ -13,14 +13,14 @@ public class DataManagerTest {
 
     private DataManager testDataManager = new DataManager();
 
-    @org.junit.Before
+    @Before
     public void setUp() throws Exception {
         testDataManager.openDatabase("tst/testDatabase.db");
     }
 
     @Test
     public void testGetDates(){
-        TripleDate<LocalDate> correctDates;
+        TripleDate correctDates;
         //correctDates.add()
         //assertEquals(testDataManager.getDates(), correctDates);
 
