@@ -60,10 +60,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             createDatabaseStatement.execute(createTableThree);
 
             DBConnection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        } catch (ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
             return false;
         }
@@ -214,7 +211,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             addNewEntryStatement.setInt(2, normalData.get("Start_Year"));
             addNewEntryStatement.execute();
 
-            String addEntryInfoStatementString = "INSERT INTO Entries VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, )";
+            String addEntryInfoStatementString = "INSERT INTO Entries VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement addEntryInfoStatement = DBConnection.prepareStatement(addNewEntryStatementString);
             addEntryInfoStatement.setInt(1, normalData.get("Start_Day"));
             addEntryInfoStatement.setInt(2, normalData.get("Start_Month"));

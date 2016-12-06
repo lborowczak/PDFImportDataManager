@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -268,7 +269,8 @@ public class PDFImporterTest {
 
     @Test
     public void checkPortraitData() throws Exception{
-        assertEquals(portraitData.toString(), testPortraitImporter.getData().toString());
+        assertEquals(portraitData, testPortraitImporter.getData());
+        //assertTrue(Arrays.deepEquals(portraitData.toArray(), testPortraitImporter.getData().toArray()));
     }
 
     @Test

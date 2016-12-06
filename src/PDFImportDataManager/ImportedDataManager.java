@@ -4,19 +4,30 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
-import java.util.List;
-import java.util.Locale;
-import java.util.StringJoiner;
+import java.util.*;
 
 public class ImportedDataManager {
 
     private PDFImporter managedPDFImporter = new TabulaPDFImporter();
+    private List<List<List<String>>> importedData;
+    private List<String> users;
+    private List<Map> userData;
+
 
     public boolean importPDF(String PDFFile){
-        return (managedPDFImporter.importPDF(PDFFile));
+        if (!managedPDFImporter.importPDF(PDFFile)){
+            //Import failed
+            return false;
+        }
+        importedData = managedPDFImporter.getData();
+
+
+
+        return true;
     }
     //TODO think about below methods and where they should be
     public List<String> getUsers(){
+        //List<List<List<String>>>
         return null;
     }
 
@@ -59,6 +70,8 @@ public class ImportedDataManager {
         return new TripleDate(firstDate, secondDate, payDate);
     }
 
-
+    public List<List<Map>> getUserData(String user) {
+    return null;
+    }
 
 }

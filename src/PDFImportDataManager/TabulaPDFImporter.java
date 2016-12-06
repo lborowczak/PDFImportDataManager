@@ -5,19 +5,21 @@ import technology.tabula.*;
 import technology.tabula.extractors.ExtractionAlgorithm;
 import technology.tabula.extractors.BasicExtractionAlgorithm;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class TabulaPDFImporter implements PDFImporter {
 
 
-    ExtractionAlgorithm basicExtractor = new BasicExtractionAlgorithm();
-    ObjectExtractor oe;
-    List<List<List<String>>> extractedData = new ArrayList<List<List<String>>>();
-    String datesString = "";
+    private ExtractionAlgorithm basicExtractor = new BasicExtractionAlgorithm();
+    private ObjectExtractor oe;
+    private List<List<List<String>>> extractedData = new ArrayList<List<List<String>>>();
+    private String datesString = "";
 
 
 

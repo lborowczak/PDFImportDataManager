@@ -1,5 +1,6 @@
 package PDFImportDataManager;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -25,8 +26,10 @@ public class DataManager {
     }
 
     public boolean importPDF(String PDFFile){
+        return (checkValidFilename(PDFFile, false) &&
+                globalImportedDataManager.importPDF(PDFFile));
         //TODO add checks for file path existence, or do it in controller?
-        return globalImportedDataManager.importPDF(PDFFile);
+        //return globalImportedDataManager.importPDF(PDFFile);
     }
 
     public boolean generateReport(String PDFFile){
@@ -34,5 +37,10 @@ public class DataManager {
         return globalReportGenerator.outputReport(PDFFile);
     }
 
+    private boolean checkValidFilename(String filename, boolean isNew){
+        File toBeChecked = new File(filename);
+        return toBeChecked.canWrite();
+
+    }
 
 }
