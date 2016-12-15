@@ -1,19 +1,18 @@
 package PDFImportDataManager;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.net.URL;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 public class MainUIController {
 
@@ -23,6 +22,7 @@ public class MainUIController {
 
     @FXML
     private Accordion mainAccordion;
+    @FXML private Text entryInfoText;
 
 
     void setData(DataManager manager, Stage stage) {
@@ -40,13 +40,21 @@ public class MainUIController {
     }
 
     public void onCloseMenuItemPressed(ActionEvent actionEvent) {
-
+        currStage.close();
     }
 
 
     public void onAboutMenuItemPressed(ActionEvent actionEvent) {
         notifyUser("PDF Import Data Manager Version 1.0");
     }
+
+
+
+    public void onGenerateReportPressed(ActionEvent actionEvent) {
+        //
+    }
+
+
 
 
     private void notifyUser(String dialogText){
@@ -78,7 +86,6 @@ public class MainUIController {
         //List<>
         //Howto: ID of entry == id of list item
         //mainManager.getOverview();
-
     }
 
     private void addYearAccordion(Integer year, Map<String, Map<String, String>> months, Accordion accordionToPopulate) {
@@ -90,9 +97,45 @@ public class MainUIController {
     }
 
     private void addMonthTitledPane(String month, Map<String, String> monthEntries, Accordion accordionToPopulate) {
-        ListView<listItem> monthEntriesList = new ListView<>();
-        TitledPane monthPane = new TitledPane(month, monthEntriesList);
-        monthEntries.forEach( (k, v) -> monthEntriesList.getItems().add(new listItem(k, v)));
+
+        ObservableList<listItem> monthEntriesList = FXCollections.observableArrayList();
+        final ListView<listItem> monthEntriesListView = new ListView<listItem>(monthEntriesList);
+        monthEntriesListView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                listItem clickedItem = monthEntriesListView.getSelectionModel().getSelectedItem();
+                if (clickedItem == null){
+                    return;
+                }
+                entryInfoText.setText(clickedItem.toString());
+            }
+        });
+
+
+        TitledPane monthPane = new TitledPane(month, monthEntriesListView);
+        monthEntries.forEach( (k, v) -> monthEntriesListView.getItems().add(new listItem(k, v)));
+
+
+        /*
+        monthEntriesListView.setCellFactory(new Callback<ListView<listItem>, ListCell<listItem>>(){
+            public ListCell<listItem> call(ListView<listItem> param) {
+                final Label leadLbl = new Label();
+                final Tooltip tooltip = new Tooltip();
+                final ListCell<listItem> cell = new ListCell<listItem>() {
+                    @Override
+                    public void updateItem(listItem item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item != null) {
+                            System.out.println("SELECTED " + item);
+                            setText(item.toString());
+                        }
+                    }
+                }; // ListCell
+                return cell;
+            }
+        });*/
+
+
         accordionToPopulate.getPanes().add(monthPane);
     }
 

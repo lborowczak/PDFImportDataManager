@@ -3,14 +3,17 @@ package PDFImportDataManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.sqlite.core.DB;
@@ -18,8 +21,7 @@ import org.sqlite.core.DB;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DatabaseChooserController {
 
@@ -38,9 +40,8 @@ public class DatabaseChooserController {
             return;
         }
         onDatabaseChosen(DBFile);
-
-
     }
+
 
     public void onCreateDatabasePressed(ActionEvent actionEvent) {
 
@@ -55,10 +56,20 @@ public class DatabaseChooserController {
             notifyUser("Cannot write to this file. It may be on a write-protected device.");
             return;
         }
-        if (!mainManager.createDatabase(DBFile)){
+
+        //Show window for user to enter company info
+        Dialog<Map<String, String>> enterCompanyInfoDialog = createCompanyInfoDialog();
+        Optional<Map<String, String>> companyInfo = enterCompanyInfoDialog.showAndWait();
+
+        if (!companyInfo.isPresent()){
+            return;
+        }
+
+        if (!mainManager.createDatabase(DBFile, companyInfo.get())){
             notifyUser("There was a problem creating the database.");
             return;
         }
+
 
 
         notifyUser("The new database has been created successfully.");
@@ -84,7 +95,7 @@ public class DatabaseChooserController {
             return fileChooser.showSaveDialog(currStage);
         }
         else {
-        return fileChooser.showOpenDialog(currStage);
+            return fileChooser.showOpenDialog(currStage);
         }
     }
 
@@ -96,8 +107,10 @@ public class DatabaseChooserController {
             switch (properties.charAt(i)) {
                 case 'c':
                     //See if a temporary file can be created at the path
-                    try {
-                        Files.deleteIfExists(fileToCheck.toPath());
+                    if (Files.exists(fileToCheck.toPath())){
+                        hasProperties = hasProperties && fileHasProperties(fileToCheck, "rw");
+                    }
+                    else try {
                         Files.createFile(fileToCheck.toPath());
                         Files.delete(fileToCheck.toPath());
                     } catch (IOException e){
@@ -129,6 +142,40 @@ public class DatabaseChooserController {
         alert.showAndWait();
     }
 
+    private Dialog<Map<String, String>> createCompanyInfoDialog(){
+        Dialog<Map<String, String>> enterCompanyInfoDialog = new Dialog<>();
+        enterCompanyInfoDialog.setHeaderText("Enter the company information");
+        enterCompanyInfoDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        GridPane dialogGridPane = new GridPane();
+        dialogGridPane.setHgap(10);
+        dialogGridPane.setVgap(10);
+        dialogGridPane.setAlignment(Pos.CENTER);
+        dialogGridPane.add(new Label("Company Name: "), 0, 0);
+        dialogGridPane.add(new Label("Company EIN: "), 0, 1);
+        dialogGridPane.add(new Label("Company PIN: "), 0, 2);
+        TextField companyNameField = new TextField();
+        TextField companyEINField = new TextField();
+        TextField companyPINField = new TextField();
+        GridPane.setConstraints(companyNameField, 1, 0);
+        GridPane.setConstraints(companyEINField, 1, 1);
+        GridPane.setConstraints(companyPINField, 1, 2);
+        dialogGridPane.getChildren().addAll(companyNameField, companyEINField, companyPINField);
+        enterCompanyInfoDialog.getDialogPane().setContent(dialogGridPane);
+
+        enterCompanyInfoDialog.setResultConverter(clickedButton -> {
+            if (clickedButton == ButtonType.OK) {
+                Map<String, String> tmpReturnMap = new HashMap<String, String>();
+                tmpReturnMap.put("Company_Name", companyNameField.getText());
+                tmpReturnMap.put("Company_EIN", companyEINField.getText());
+                tmpReturnMap.put("Company_PIN", companyPINField.getText());
+                return tmpReturnMap;
+            }
+            return null;
+        });
+
+        return enterCompanyInfoDialog;
+    }
+
 
 
     private void onDatabaseChosen(File DBFile) {
@@ -152,6 +199,7 @@ public class DatabaseChooserController {
 
             currStage.hide();
             newStage.show();
+            currStage.close();
         }
         catch (IOException e){
             e.printStackTrace();

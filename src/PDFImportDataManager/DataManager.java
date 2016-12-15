@@ -30,9 +30,9 @@ public class DataManager {
         return globalImportedDataManager.getDates();
     }
 
-    public boolean createDatabase(File DBFile){
+    public boolean createDatabase(File DBFile,  Map<String, String> companyInfo){
         //TODO add checks for file path existence, or do it in controller?
-        return globalDBManager.createDatabase(DBFile);
+        return globalDBManager.createDatabase(DBFile, companyInfo);
     }
 
     public boolean openDatabase(File DBFile){
@@ -83,7 +83,7 @@ public class DataManager {
             int tmpYear = tmpEntryInfo.get("Year");
             int tmpStartDay = tmpEntryInfo.get("Start_Day");
             int tmpEndDay = tmpEntryInfo.get("End_Day");
-            tmpDatesToIDMap.put(tmpStartDay + "- " + tmpEndDay, ID);
+            tmpDatesToIDMap.put(tmpStartDay + " - " + tmpEndDay, ID);
             tmpMonthNamesMap.put(new DateFormatSymbols().getMonths()[tmpMonth-1], tmpDatesToIDMap);
             returnMap.put(tmpYear, tmpMonthNamesMap);
         }

@@ -11,7 +11,7 @@ public interface DatabaseManager {
 
     Connection DBConnection = null;
 
-    public boolean createDatabase(File DBFile);
+    public boolean createDatabase(File DBFile,  Map<String, String> companyInfo);
     public boolean openDatabase(File DBFile);
     public List<String> getEntryList();
 

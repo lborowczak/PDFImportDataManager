@@ -19,7 +19,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public boolean createDatabase(File DBFile){
+    public boolean createDatabase(File DBFile, Map<String, String> companyInfo){
         try {
             Class.forName("org.sqlite.JDBC");
             DBConnection = DriverManager.getConnection("jdbc:sqlite:" + DBFile, enableForeignKeysConfig.toProperties());
@@ -61,6 +61,15 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             createDatabaseStatement.execute(createTableOne);
             createDatabaseStatement.execute(createTableTwo);
             createDatabaseStatement.execute(createTableThree);
+
+            String setCompanyInfoString = "INSERT INTO CompanyInfo VALUES(?, ?, ?)";
+            PreparedStatement setCompanyInfoStatement = DBConnection.prepareStatement(setCompanyInfoString);
+            setCompanyInfoStatement.setString(1, companyInfo.get("Company_Name"));
+            setCompanyInfoStatement.setString(2, companyInfo.get("Company_EIN"));
+            setCompanyInfoStatement.setString(3, companyInfo.get("Company_PIN"));
+            setCompanyInfoStatement.execute();
+
+
             DBConnection.close();
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -105,7 +114,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     @Override
     public Map<String, Integer> getEntryInfo(String entryID) {
         //Returns a mapping of Month, Year, Start_Day, and End_Day to integers
-        Map<String, Integer> result = new HashMap<>();
+        Map<String, Integer> result = new HashMap<String, Integer>();
         int entryIDInt = Integer.parseInt(entryID);
         try {
             String statementString = "SELECT ENTRY_MONTH, ENTRY_YEAR, START_DAY, END_DAY FROM Entries where ENTRY_ID = ?;";
