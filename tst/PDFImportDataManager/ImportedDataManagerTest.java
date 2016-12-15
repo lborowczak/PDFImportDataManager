@@ -14,11 +14,11 @@ public class ImportedDataManagerTest {
 
     private ImportedDataManager testPortraitImportedDataManager = new ImportedDataManager();
     private ImportedDataManager testLandscapeImportedDataManager = new ImportedDataManager();
-    private LocalDate date1 = LocalDate.parse("2016-10-02");
+    /*private LocalDate date1 = LocalDate.parse("2016-10-02");
     private LocalDate date2 = LocalDate.parse("2016-10-08");
     private LocalDate paydate = LocalDate.parse("2016-10-12");
-
-    private TripleDate correctDate = new TripleDate(date1, date2, paydate);
+*/
+    private TripleDate correctDate = new TripleDate(LocalDate.parse("2016-10-02"), LocalDate.parse("2016-10-08"), LocalDate.parse("2016-10-12"));
 
     @Before
     public void setUp() throws Exception {

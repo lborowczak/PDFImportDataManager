@@ -1,5 +1,8 @@
 package PDFImportDataManager;
 
+import PDFImportDataManager.PDFImporter.TabulaPDFImporter;
+import PDFImportDataManager.interfaces.PDFImporter;
+
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -10,26 +13,33 @@ import java.util.*;
 public class ImportedDataManager {
 
     private PDFImporter managedPDFImporter = new TabulaPDFImporter();
-    private List<List<List<String>>> importedData;
+    //private List<List<List<String>>> importedData;
+    private Map<String, Map<String, Integer>> parsedData;
     private List<String> users;
     private List<Map> userData;
 
 
-    public boolean importPDF(File PDFFile){
-        if (!managedPDFImporter.importPDF(PDFFile)){
+    public boolean importPDF(File PDFFile) {
+
+        if (!managedPDFImporter.importPDF(PDFFile)) {
+
             //Import failed
             return false;
         }
-        importedData = managedPDFImporter.getData();
+        List<List<List<String>>> importedData = managedPDFImporter.getData();
+        parseData(importedData);
+
+
 
 
 
         return true;
     }
+
     //TODO think about below methods and where they should be
-    public List<String> getUsers(){
+    public List<String> getUsers() {
         //List<List<List<String>>>
-        return null;
+        return users;
     }
 
     public TripleDate getDates() {
@@ -46,21 +56,20 @@ public class ImportedDataManager {
         //Get the year, month, and days for the payment week
         yearString = dateStringArray[dateStringArray.length - 1];
 
-        firstMonthString = dateStringArray[0].substring(0,3);
-        if (dateStringArray[2].contains("through")){
+        firstMonthString = dateStringArray[0].substring(0, 3);
+        if (dateStringArray[2].contains("through")) {
             secondMonthString = dateStringArray[4];
-        }
-        else {
+        } else {
             secondMonthString = firstMonthString;
         }
 
         firstDayString = String.format("%02d", Integer.parseInt(dateStringArray[1]));
-        secondDayString = dateStringArray[dateStringArray.length - 2].replaceAll(",","");
+        secondDayString = dateStringArray[dateStringArray.length - 2].replaceAll(",", "");
         secondDayString = String.format("%02d", Integer.parseInt(secondDayString));
 
-        firstDate = LocalDate.parse(yearString +"-" + firstMonthString +"-" + firstDayString, formatter);
+        firstDate = LocalDate.parse(yearString + "-" + firstMonthString + "-" + firstDayString, formatter);
 
-        secondDate = LocalDate.parse(yearString +"-" + secondMonthString +"-" + secondDayString, formatter);
+        secondDate = LocalDate.parse(yearString + "-" + secondMonthString + "-" + secondDayString, formatter);
 
         //Get Wednesday of the next week
         TemporalField tmpWeekDescription = WeekFields.of(Locale.US).dayOfWeek();
@@ -71,8 +80,18 @@ public class ImportedDataManager {
         return new TripleDate(firstDate, secondDate, payDate);
     }
 
-    public List<List<Map>> getUserData(String user) {
-    return null;
+    public Map<String, String> getUserData(String user) {
+        return null;
     }
+
+
+    private void parseData(List<List<List<String>>> dataToParse){
+
+        for (List<List<String>> currPage : dataToParse) {
+            System.out.println(currPage);
+        }
+    }
+
+
 
 }

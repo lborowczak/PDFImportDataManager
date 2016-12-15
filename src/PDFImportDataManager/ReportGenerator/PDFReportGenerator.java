@@ -1,6 +1,8 @@
-package PDFImportDataManager;
+package PDFImportDataManager.ReportGenerator;
 
 
+import PDFImportDataManager.TripleDate;
+import PDFImportDataManager.interfaces.ReportGenerator;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -13,9 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Map;
 
 public class PDFReportGenerator implements ReportGenerator {
@@ -51,7 +51,7 @@ public class PDFReportGenerator implements ReportGenerator {
         String monthString = dates.getPayDate().minusDays(7).getMonth().toString();
         String datesString = dates.getBeginDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + " - " +
                 dates.getEndDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-        int quarterString = (int)dates.getPayDate().minusDays(7).getMonthValue() / 4;
+        int quarterString = (int)Math.ceil((double)dates.getPayDate().minusDays(7).getMonthValue() / 4.0);
 
         //Points per inch variable
         float PPI = 72;
@@ -65,7 +65,7 @@ public class PDFReportGenerator implements ReportGenerator {
         generatedPDF.addPage(firstPage);
 
         //Create DecimalFormatter to round numbers to 2 digits
-        DecimalFormat df = new DecimalFormat("#.00");
+        DecimalFormat df = new DecimalFormat("0.00");
         df.setRoundingMode(RoundingMode.HALF_UP);
 
         try {
@@ -94,7 +94,7 @@ public class PDFReportGenerator implements ReportGenerator {
             float distanceToMove = 5.8f * PPI;
             for (Map.Entry<String, Integer> entry : entries.entrySet()){
                 writeText(contentStream, font, 10, entry.getKey(), 2.5f * PPI, distanceToMove);
-                writeText(contentStream, font, 10, "$" + (entry.getValue() / 100.0), 3.5f * PPI, distanceToMove);
+                writeText(contentStream, font, 10, "$" + df.format(entry.getValue() / 100.0), 3.5f * PPI, distanceToMove);
                 distanceToMove -= 0.2*PPI;
             }
             //Write total amount and draw lines as seen in example report

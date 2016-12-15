@@ -1,5 +1,6 @@
-package PDFImportDataManager;
+package PDFImportDataManager.Controllers;
 
+import PDFImportDataManager.DataManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,13 +20,17 @@ public class MainUIController {
 
     private DataManager mainManager;
     private Stage currStage;
+    private ControllerHelper helper = new ControllerHelper();
+    private listItem currItem = null;
 
-    @FXML
-    private Accordion mainAccordion;
+    @FXML private Accordion mainAccordion;
     @FXML private Text entryInfoText;
+    @FXML private Button generateReportButton;
+    @FXML private Button editEntryButton;
+    @FXML private Button deleteEntryButton;
 
 
-    void setData(DataManager manager, Stage stage) {
+    public void setData(DataManager manager, Stage stage) {
         mainManager = manager;
         currStage = stage;
     }
@@ -36,6 +41,19 @@ public class MainUIController {
 
 
     public void onImportPDFMenuItemPressed(ActionEvent actionEvent) {
+        File PDFFile = helper.chooseFile("Select PDF File...", false, currStage);
+
+        //e = error importing PDF file, c = data checking error
+        switch (mainManager.importPDF(PDFFile)) {
+            case 'e':
+                helper.notifyUser("An error occurred when importing the PDF file.");
+                return;
+            case 'c':
+                helper.notifyUser("Warning: The extracted data values did not match.");
+                break;
+            case 'g':
+                helper.notifyUser("PDF imported correctly.");
+        }
 
     }
 
@@ -45,47 +63,38 @@ public class MainUIController {
 
 
     public void onAboutMenuItemPressed(ActionEvent actionEvent) {
-        notifyUser("PDF Import Data Manager Version 1.0");
+        helper.notifyUser("PDF Import Data Manager Version 1.0");
     }
 
 
 
     public void onGenerateReportPressed(ActionEvent actionEvent) {
-        //
-    }
-
-
-
-
-    private void notifyUser(String dialogText){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        //alert.setTitle("");
-        alert.setHeaderText(null);
-        alert.setContentText(dialogText);
-        alert.showAndWait();
-    }
-
-
-    private File chooseFile(String windowTitle, boolean isSaveDialog) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(windowTitle);
-        if (isSaveDialog) {
-            return fileChooser.showSaveDialog(currStage);
+        File PDFFile = helper.chooseFile("Save PDF file as...", true, currStage);
+        if (PDFFile == null){
+            return;
         }
-        else {
-            return fileChooser.showOpenDialog(currStage);
+        if (!helper.fileHasProperties(PDFFile, "c")){
+            helper.notifyUser("Cannot write to this file. It may be on a write-protected device.");
+            return;
         }
+        mainManager.generateReport(PDFFile, currItem.getIDString());
     }
+
+
+    public void onEditEntryPressed(ActionEvent actionEvent) {
+    }
+
+    public void onDeleteEntryPressed(ActionEvent actionEvent) {
+    }
+
 
     private void loadData(){
         //Data structure:
-        //Map<Year, Map<MonthName, Map<Week, entryID>
+        //Map<Year, Map<MonthName, Map<WeekString, entryID>
         Map<Integer, Map<String, Map<String, String>>> entryList = mainManager.getOverview();
 
         entryList.forEach( (k,v) -> addYearAccordion(k, v, mainAccordion));
-        //List<>
-        //Howto: ID of entry == id of list item
-        //mainManager.getOverview();
+
     }
 
     private void addYearAccordion(Integer year, Map<String, Map<String, String>> months, Accordion accordionToPopulate) {
@@ -107,33 +116,17 @@ public class MainUIController {
                 if (clickedItem == null){
                     return;
                 }
-                entryInfoText.setText(clickedItem.toString());
+                currItem = clickedItem;
+                entryInfoText.setText(mainManager.getFormattedEntryData(clickedItem.getIDString()));
+                generateReportButton.setDisable(false);
+                editEntryButton.setDisable(false);
+                deleteEntryButton.setDisable(false);
             }
         });
 
 
         TitledPane monthPane = new TitledPane(month, monthEntriesListView);
         monthEntries.forEach( (k, v) -> monthEntriesListView.getItems().add(new listItem(k, v)));
-
-
-        /*
-        monthEntriesListView.setCellFactory(new Callback<ListView<listItem>, ListCell<listItem>>(){
-            public ListCell<listItem> call(ListView<listItem> param) {
-                final Label leadLbl = new Label();
-                final Tooltip tooltip = new Tooltip();
-                final ListCell<listItem> cell = new ListCell<listItem>() {
-                    @Override
-                    public void updateItem(listItem item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item != null) {
-                            System.out.println("SELECTED " + item);
-                            setText(item.toString());
-                        }
-                    }
-                }; // ListCell
-                return cell;
-            }
-        });*/
 
 
         accordionToPopulate.getPanes().add(monthPane);

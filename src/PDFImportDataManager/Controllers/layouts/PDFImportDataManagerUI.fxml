@@ -6,7 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.76-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="PDFImportDataManager.MainUIController">
+<VBox prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.76-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="PDFImportDataManager.Controllers.MainUIController">
    <children>
       <MenuBar>
         <menus>
@@ -52,9 +52,9 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Button mnemonicParsing="false" text="Generate Report from selected entry..." GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" onAction="#onGenerateReportPressed"/>
-                        <Button mnemonicParsing="false" text="Edit selected entry..." GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" text="Delete selected entry" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" />
+                        <Button disable="true" mnemonicParsing="false" fx:id="generateReportButton" onAction="#onGenerateReportPressed" text="Generate Report from selected entry..." GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
+                        <Button disable="true" mnemonicParsing="false" fx:id="editEntryButton" onAction="#onEditEntryPressed" text="Edit selected entry..." GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" />
+                        <Button disable="true" mnemonicParsing="false" fx:id="deleteEntryButton" onAction="#onDeleteEntryPressed" text="Delete selected entry" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" />
                      </children>
                   </GridPane>
                </children>

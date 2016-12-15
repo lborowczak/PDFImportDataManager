@@ -1,4 +1,4 @@
-package PDFImportDataManager;
+package PDFImportDataManager.interfaces;
 
 
 import java.io.File;

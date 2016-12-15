@@ -1,24 +1,22 @@
 package PDFImportDataManager;
 
+import PDFImportDataManager.DatabaseManager.SQLiteDatabaseManager;
+import PDFImportDataManager.interfaces.DatabaseManager;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.Assert.*;
 
 public class DatabaseManagerTest {
 
-    private  DatabaseManager testSQLiteDB = new SQLiteDatabaseManager();
+    private DatabaseManager testSQLiteDB = new SQLiteDatabaseManager();
     //private List<Map<>>
 
     @Before

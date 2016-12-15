@@ -1,4 +1,6 @@
-package PDFImportDataManager;
+package PDFImportDataManager.interfaces;
+
+import PDFImportDataManager.TripleDate;
 
 import java.io.File;
 import java.util.List;

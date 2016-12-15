@@ -1,5 +1,6 @@
-package PDFImportDataManager;
+package PDFImportDataManager.PDFImporter;
 
+import PDFImportDataManager.interfaces.PDFImporter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import technology.tabula.*;
 import technology.tabula.extractors.ExtractionAlgorithm;
@@ -7,11 +8,8 @@ import technology.tabula.extractors.BasicExtractionAlgorithm;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class TabulaPDFImporter implements PDFImporter {
 
@@ -19,6 +17,7 @@ public class TabulaPDFImporter implements PDFImporter {
     private ExtractionAlgorithm basicExtractor = new BasicExtractionAlgorithm();
     private ObjectExtractor oe;
     private List<List<List<String>>> extractedData = new ArrayList<List<List<String>>>();
+    private List<List<List<String>>> usersData = new ArrayList<List<List<String>>>();
     private String datesString = "";
 
 
@@ -35,6 +34,8 @@ public class TabulaPDFImporter implements PDFImporter {
 
         //Set areas of the page where the date is.
         Rectangle datesPageArea = new Rectangle(60.0f,150.0f,1000.0f,40.0f);
+
+        Rectangle usersNamesPageArea = new Rectangle(80.0f, 0.0f, 0.0f, 0.0f);
 
         //Set area of the page where the data will be
         Rectangle itemsDataPageArea = new Rectangle(110.0f,0.0f,1000.0f, 1000.0f);
@@ -68,7 +69,9 @@ public class TabulaPDFImporter implements PDFImporter {
 
             //Extract all other page data
             Page tmpItemsDataArea = currPage.getArea(itemsDataPageArea);
+            Page tmpUsersNamesPageArea = currPage.getArea(usersNamesPageArea);
             extractedData.add(getAreaData(tmpItemsDataArea));
+            usersData.add(getAreaData(tmpUsersNamesPageArea));
 
         }
         try {
@@ -89,6 +92,11 @@ public class TabulaPDFImporter implements PDFImporter {
     public List<List<List<String>>> getData(){
         //Outer list = list of results of getAreaDate, page by page
         return extractedData;
+    }
+
+    @Override
+    public List<List<List<String>>> getUsersData(){
+        return usersData;
     }
 
 

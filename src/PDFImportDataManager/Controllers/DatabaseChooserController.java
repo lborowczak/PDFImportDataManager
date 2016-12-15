@@ -1,22 +1,16 @@
-package PDFImportDataManager;
+package PDFImportDataManager.Controllers;
 
+import PDFImportDataManager.DataManager;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.sqlite.core.DB;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,17 +20,18 @@ import java.util.*;
 public class DatabaseChooserController {
 
     private DataManager mainManager = new DataManager();
+    private ControllerHelper helper = new ControllerHelper();
 
     private Stage currStage;
 
     public void onLoadDatabasePressed(ActionEvent actionEvent) {
-        File DBFile = chooseFile("Open database...", false);
+        File DBFile = helper.chooseFile("Open database...", false, currStage);
 
         if (DBFile == null){
             return;
         }
-        if (!fileHasProperties(DBFile, "erw")){
-            notifyUser("This file does not exist or cannot be used.");
+        if (!helper.fileHasProperties(DBFile, "erw")){
+            helper.notifyUser("This file does not exist or cannot be used.");
             return;
         }
         onDatabaseChosen(DBFile);
@@ -45,15 +40,15 @@ public class DatabaseChooserController {
 
     public void onCreateDatabasePressed(ActionEvent actionEvent) {
 
-        File DBFile = chooseFile("Create new database...", true);
+        File DBFile = helper.chooseFile("Create new database...", true, currStage);
 
         //JavaFX UI already asks the user if they want to replace the file, so we don't have to.
 
         if (DBFile == null){
             return;
         }
-        if (!fileHasProperties(DBFile, "c")){
-            notifyUser("Cannot write to this file. It may be on a write-protected device.");
+        if (!helper.fileHasProperties(DBFile, "c")){
+            helper.notifyUser("Cannot write to this file. It may be on a write-protected device.");
             return;
         }
 
@@ -65,14 +60,19 @@ public class DatabaseChooserController {
             return;
         }
 
+        try {
+            Files.deleteIfExists(DBFile.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (!mainManager.createDatabase(DBFile, companyInfo.get())){
-            notifyUser("There was a problem creating the database.");
+            helper.notifyUser("There was a problem creating the database.");
             return;
         }
 
+        helper.notifyUser("The new database has been created successfully.");
 
-
-        notifyUser("The new database has been created successfully.");
     }
 
     public void onQuitButtonPressed(ActionEvent actionEvent) {
@@ -84,63 +84,9 @@ public class DatabaseChooserController {
 /**********************************************************************************************************************/
 //Helper methods
 
-    void setStage(Stage stage) {
+    public void setStage(Stage stage) {
     currStage = stage;
 }
-
-    private File chooseFile(String windowTitle, boolean isSaveDialog) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(windowTitle);
-        if (isSaveDialog) {
-            return fileChooser.showSaveDialog(currStage);
-        }
-        else {
-            return fileChooser.showOpenDialog(currStage);
-        }
-    }
-
-    //Check file properties:
-    // e=existence, c=createable, r=readable, w=writeable, x=executable,
-    private boolean fileHasProperties(File fileToCheck, String properties) {
-        boolean hasProperties = true;
-        for (int i = 0; i < properties.length(); i++) {
-            switch (properties.charAt(i)) {
-                case 'c':
-                    //See if a temporary file can be created at the path
-                    if (Files.exists(fileToCheck.toPath())){
-                        hasProperties = hasProperties && fileHasProperties(fileToCheck, "rw");
-                    }
-                    else try {
-                        Files.createFile(fileToCheck.toPath());
-                        Files.delete(fileToCheck.toPath());
-                    } catch (IOException e){
-                        hasProperties = false;
-                    }
-                    break;
-                case 'e':
-                    hasProperties = hasProperties && Files.exists(fileToCheck.toPath());
-                    break;
-                case 'r':
-                    hasProperties = hasProperties && Files.isReadable(fileToCheck.toPath());
-                    break;
-                case 'w':
-                    hasProperties = hasProperties && Files.isWritable(fileToCheck.toPath());
-                    break;
-                case 'x':
-                    hasProperties = hasProperties && Files.isExecutable(fileToCheck.toPath());
-                    break;
-            }
-        }
-        return hasProperties;
-    }
-
-    private void notifyUser(String dialogText){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        //alert.setTitle("");
-        alert.setHeaderText(null);
-        alert.setContentText(dialogText);
-        alert.showAndWait();
-    }
 
     private Dialog<Map<String, String>> createCompanyInfoDialog(){
         Dialog<Map<String, String>> enterCompanyInfoDialog = new Dialog<>();
@@ -180,7 +126,7 @@ public class DatabaseChooserController {
 
     private void onDatabaseChosen(File DBFile) {
         if (!mainManager.openDatabase(DBFile)) {
-            notifyUser("Database could not be opened.");
+            helper.notifyUser("Database could not be opened.");
             return;
         }
 

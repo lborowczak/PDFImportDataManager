@@ -1,14 +1,12 @@
 package PDFImportDataManager;
 
+import PDFImportDataManager.PDFImporter.TabulaPDFImporter;
+import PDFImportDataManager.interfaces.PDFImporter;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;

@@ -1,5 +1,6 @@
-package PDFImportDataManager;
+package PDFImportDataManager.DatabaseManager;
 
+import PDFImportDataManager.interfaces.DatabaseManager;
 import org.sqlite.SQLiteConfig;
 
 import java.io.File;
@@ -35,8 +36,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
                     "ENTRY_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "ENTRY_MONTH INTEGER," +
                     "ENTRY_YEAR INTEGER," +
-                    "START_DAY INTEGER," +
-                    "END_DAY INTEGER" +
+                    "START_DAY INTEGER" +
                 ");";
             String createTableThree =
                 "CREATE TABLE EntryData (" +
@@ -117,7 +117,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
         Map<String, Integer> result = new HashMap<String, Integer>();
         int entryIDInt = Integer.parseInt(entryID);
         try {
-            String statementString = "SELECT ENTRY_MONTH, ENTRY_YEAR, START_DAY, END_DAY FROM Entries where ENTRY_ID = ?;";
+            String statementString = "SELECT ENTRY_MONTH, ENTRY_YEAR, START_DAY FROM Entries where ENTRY_ID = ?;";
             PreparedStatement getEntryInfoStatement = DBConnection.prepareStatement(statementString);
             getEntryInfoStatement.setInt(1, entryIDInt);
             getEntryInfoStatement.execute();
@@ -125,7 +125,6 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             result.put("Month", entriesSet.getInt("ENTRY_MONTH"));
             result.put("Year", entriesSet.getInt("ENTRY_YEAR"));
             result.put("Start_Day", entriesSet.getInt("START_DAY"));
-            result.put("End_Day", entriesSet.getInt("END_DAY"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -138,9 +137,10 @@ public class SQLiteDatabaseManager implements DatabaseManager {
         List<Map<String, Integer>> result = new ArrayList<>();
         int entryIDInt = Integer.parseInt(entryID);
         try {
-            String statementString = "SELECT * FROM EntryData where ENTRY_ID = ?;";
+            String statementString = "SELECT * FROM EntryData where CURR_ENTRY_ID = ?;";
             PreparedStatement getEntryInfoStatement = DBConnection.prepareStatement(statementString);
             getEntryInfoStatement.setInt(1, entryIDInt);
+            getEntryInfoStatement.execute();
             ResultSet entriesSet = getEntryInfoStatement.getResultSet();
             basicEntries.put("Start_Day", entriesSet.getInt("Start_Day"));
             basicEntries.put("Start_Month", entriesSet.getInt("Start_Month"));
@@ -166,7 +166,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             String breakdownInfo = entriesSet.getString("Gross_Breakdown_Info");
             for (String breakdownLine: breakdownInfo.split(";")){
                 String[] lineEntries = breakdownLine.split(",");
-                breakdownMap.put(lineEntries[0], Integer.parseInt(lineEntries[1]));
+                breakdownMap.put(lineEntries[0], ((Double)(Double.parseDouble(lineEntries[1]) * 100)).intValue());
             }
             result.add(breakdownMap);
 
@@ -221,12 +221,11 @@ public class SQLiteDatabaseManager implements DatabaseManager {
         try{
 
             //Add entry
-            String addNewEntryStatementString = "INSERT INTO Entries VALUES(NULL, ?, ?, ?, ?)";
+            String addNewEntryStatementString = "INSERT INTO Entries VALUES(NULL, ?, ?, ?)";
             PreparedStatement addNewEntryStatement = DBConnection.prepareStatement(addNewEntryStatementString);
             addNewEntryStatement.setInt(1, normalData.get("Start_Month"));
             addNewEntryStatement.setInt(2, normalData.get("Start_Year"));
             addNewEntryStatement.setInt(3, normalData.get("Start_Day"));
-            addNewEntryStatement.setInt(4, normalData.get("End_Day"));
             addNewEntryStatement.execute();
 
             String addEntryInfoStatementString = "INSERT INTO Entries VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

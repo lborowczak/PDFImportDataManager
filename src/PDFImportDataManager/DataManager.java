@@ -1,7 +1,14 @@
 package PDFImportDataManager;
 
+import PDFImportDataManager.DatabaseManager.SQLiteDatabaseManager;
+import PDFImportDataManager.ReportGenerator.PDFReportGenerator;
+import PDFImportDataManager.interfaces.DatabaseManager;
+import PDFImportDataManager.interfaces.ReportGenerator;
+
 import java.io.File;
+import java.math.RoundingMode;
 import java.text.DateFormatSymbols;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -15,44 +22,51 @@ public class DataManager {
     private List<Map<String, Integer>> reportData = null;
     private double calculatedDeposit = 0;
     private static double taxPercent = 0.153;
-    private TripleDate dates = null;
+    //private TripleDate dates = null;
     private static double differenceThreshold = 0.10;
 
     public boolean checkAmounts() {
-        Map<String, Integer> testmap = reportData.get(0);
-        calculateDeposit((double)testmap.get("Gross_Pay") / 100.0, (double)testmap.get("Federal_Withholding") / 100.0);
-        double checkDepositValue = (((double)testmap.get("Social_Security_Employee_Withholding") / 100.0 * 2.0) +
-                ((double)testmap.get("Medicare_Employee_Withholding") / 100.0 * 2) + (double)testmap.get("Federal_Withholding") / 100.0);
+        Map<String, Integer> data = reportData.get(0);
+        calculateDeposit((double)data.get("Gross_Pay") / 100.0, (double)data.get("Federal_Withholding") / 100.0);
+        double checkDepositValue = (((double)data.get("Social_Security_Employee_Withholding") / 100.0 * 2.0) +
+                ((double)data.get("Medicare_Employee_Withholding") / 100.0 * 2) + (double)data.get("Federal_Withholding") / 100.0);
         return (Math.abs(checkDepositValue - calculatedDeposit) < differenceThreshold );
     }
 
     public TripleDate getDates(){
         return globalImportedDataManager.getDates();
+        //return dates;
     }
 
     public boolean createDatabase(File DBFile,  Map<String, String> companyInfo){
-        //TODO add checks for file path existence, or do it in controller?
         return globalDBManager.createDatabase(DBFile, companyInfo);
     }
 
     public boolean openDatabase(File DBFile){
         return globalDBManager.openDatabase(DBFile);
-
     }
 
-    public boolean importPDF(File PDFFile){
-        //return (checkValidFile(PDFFile, false) &&
-        return globalImportedDataManager.importPDF(PDFFile);//);
-        //TODO add checks for file path existence, or do it in controller?
-        //return globalImportedDataManager.importPDF(PDFFile);
-    }
-
-    public boolean generateReport(File PDFFile){
-        if (reportData == null || dates == null || calculatedDeposit == 0){
-            return false;
+    public char importPDF(File PDFFile){
+        if (!globalImportedDataManager.importPDF(PDFFile)){
+            return 'e';
         }
-        Map<String, Integer> basicEntries = reportData.get(0);
+        //globalImportedDataManager
 
+        return 'g';
+        //);
+    }
+
+    public boolean generateReport(File PDFFile, String entryID){
+        reportData = globalDBManager.getEntry(entryID);
+        Map<String, Integer> basicEntries = reportData.get(0);
+        calculateDeposit((double)basicEntries.get("Gross_Pay") / 100.0, (double)basicEntries.get("Federal_Withholding") / 100.0);
+        String firstDate = basicEntries.get("Start_Year") + "-" + String.format("%02d", basicEntries.get("Start_Month")) +
+                "-" + String.format("%02d", basicEntries.get("Start_Day"));
+        String endDate = basicEntries.get("End_Year") + "-" + String.format("%02d", basicEntries.get("End_Month")) +
+                "-" + String.format("%02d", basicEntries.get("End_Day"));
+        String payDate = basicEntries.get("End_Year") + "-" + String.format("%02d", basicEntries.get("Pay_Month")) +
+                "-" + String.format("%02d", basicEntries.get("Pay_Day"));
+        TripleDate dates = new TripleDate(LocalDate.parse(firstDate), LocalDate.parse(endDate), LocalDate.parse(payDate));
         Map companyInfo = globalDBManager.getCompanyInfo();
         globalReportGenerator.setData(companyInfo.get("Company_Name").toString(), companyInfo.get("Company_EIN").toString(),
                 companyInfo.get("Company_PIN").toString(), reportData.get(1), (double)basicEntries.get("Gross_Pay") / 100.0,
@@ -80,13 +94,31 @@ public class DataManager {
             Map<String, Map <String, String>> tmpMonthNamesMap = new HashMap<>();
             Map<String, Integer> tmpEntryInfo = globalDBManager.getEntryInfo(ID);
             int tmpMonth = tmpEntryInfo.get("Month");
+            String tmpMonthName = new DateFormatSymbols().getMonths()[tmpMonth-1];
             int tmpYear = tmpEntryInfo.get("Year");
             int tmpStartDay = tmpEntryInfo.get("Start_Day");
-            int tmpEndDay = tmpEntryInfo.get("End_Day");
-            tmpDatesToIDMap.put(tmpStartDay + " - " + tmpEndDay, ID);
-            tmpMonthNamesMap.put(new DateFormatSymbols().getMonths()[tmpMonth-1], tmpDatesToIDMap);
+            tmpDatesToIDMap.put("Week of " + tmpMonthName + " " + tmpStartDay, ID);
+            tmpMonthNamesMap.put(tmpMonthName, tmpDatesToIDMap);
             returnMap.put(tmpYear, tmpMonthNamesMap);
         }
         return returnMap;
+    }
+
+    public String getFormattedEntryData(String ID) {
+        //Create DecimalFormatter to round numbers to 2 digits
+        DecimalFormat df = new DecimalFormat("#.00");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        String returnString = "";
+        List<Map<String, Integer>> returnedData = globalDBManager.getEntry(ID);
+        Map<String, Integer> data = returnedData.get(0);
+        returnString = "Entry info:\n";
+        returnString += "Week Dates: " + data.get("Start_Month") + "/" + data.get("Start_Day") + "/" + data.get("Start_Year") + " - "
+                + data.get("End_Month") + "/" + data.get("End_Day") + "/" + data.get("End_Year") + "\n";
+        returnString += "Deposit payment date: " + data.get("Pay_Month") + "/" + data.get("Pay_Day") + "/" + data.get("Pay_Year") + "\n";
+        returnString += "Gross pay: $" + df.format(data.get("Gross_Pay") / 100.0) + "\n";
+        returnString += "F/W: $" + df.format(data.get("Federal_Withholding") / 100.0) + "\n";
+        returnString += "S/W: $" + df.format(data.get("State_Withholding") / 100.0) + "\n";
+
+        return returnString;
     }
 }

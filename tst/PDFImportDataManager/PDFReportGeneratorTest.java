@@ -1,28 +1,25 @@
 package PDFImportDataManager;
 
+import PDFImportDataManager.ReportGenerator.PDFReportGenerator;
+import PDFImportDataManager.interfaces.ReportGenerator;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
 
 
 public class PDFReportGeneratorTest {
 
     private ReportGenerator testReportGenerator = new PDFReportGenerator();
-    private LocalDate date1 = LocalDate.parse("2016-10-02");
-    private LocalDate date2 = LocalDate.parse("2016-10-08");
-    private LocalDate paydate = LocalDate.parse("2016-10-12");
+    //private LocalDate date1 = LocalDate.parse("2016-10-02");
+    //private LocalDate date2 = LocalDate.parse("2016-10-08");
+    //private LocalDate paydate = LocalDate.parse("2016-10-12");
     private Map<String, Integer> tmpMap = new HashMap<>();
 
-    private TripleDate correctDate = new TripleDate(date1, date2, paydate);
+    private TripleDate correctDate = new TripleDate(LocalDate.parse("2016-10-02"), LocalDate.parse("2016-10-08"), LocalDate.parse("2016-10-12"));
 
     @Before
     public void setUp() throws Exception {
