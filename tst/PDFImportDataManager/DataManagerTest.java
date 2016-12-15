@@ -3,6 +3,7 @@ package PDFImportDataManager;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -15,7 +16,7 @@ public class DataManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        testDataManager.openDatabase("tst/testDatabase.db");
+        testDataManager.openDatabase(new File("tst/testDatabase.db"));
     }
 
     @Test

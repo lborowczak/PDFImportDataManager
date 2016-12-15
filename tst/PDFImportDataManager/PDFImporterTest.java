@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -247,8 +248,8 @@ public class PDFImporterTest {
 
     @Before
     public void setUp() throws Exception {
-        assertEquals(true, testPortraitImporter.importPDF("tst/Example_report_sent_in_portrait.pdf"));
-        assertEquals(true, testLandscapeImporter.importPDF("tst/Example_report_sent_in_landscape.pdf"));
+        assertEquals(true, testPortraitImporter.importPDF(new File("tst/Example_report_sent_in_portrait.pdf")));
+        assertEquals(true, testLandscapeImporter.importPDF(new File("tst/Example_report_sent_in_landscape.pdf")));
     }
 
     @After

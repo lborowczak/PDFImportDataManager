@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,13 +19,14 @@ import static org.junit.Assert.*;
 public class DatabaseManagerTest {
 
     private  DatabaseManager testSQLiteDB = new SQLiteDatabaseManager();
+    //private List<Map<>>
 
     @Before
     public void setUp() throws Exception {
         //Files.copy("./tst/testDatabase.db", "./tst/tempDB.db", REPLACE_EXISTING);
 
         //testSQLiteDB.createDatabase("./tst/tempDB.db");
-        assertEquals(true, testSQLiteDB.openDatabase("./tst/tempDB.db"));
+        assertEquals(true, testSQLiteDB.openDatabase(new File("./tst/tempDB.db")));
     }
 
     @Test

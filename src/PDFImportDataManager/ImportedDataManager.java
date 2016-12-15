@@ -1,5 +1,6 @@
 package PDFImportDataManager;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalField;
@@ -14,7 +15,7 @@ public class ImportedDataManager {
     private List<Map> userData;
 
 
-    public boolean importPDF(String PDFFile){
+    public boolean importPDF(File PDFFile){
         if (!managedPDFImporter.importPDF(PDFFile)){
             //Import failed
             return false;

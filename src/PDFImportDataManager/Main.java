@@ -10,7 +10,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("PDFImportDataManagerUI.fxml"));
+        //Load UI
+        FXMLLoader UILoader = new FXMLLoader(getClass().getResource("layouts/DatabaseChooser.fxml"));
+        Parent root = (Parent)UILoader.load();
+
+        //Give controller access to the current stage
+        DatabaseChooserController currController = (DatabaseChooserController) UILoader.getController();
+        currController.setStage(primaryStage);
+
+        
         primaryStage.setTitle("Open or create a database...");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();

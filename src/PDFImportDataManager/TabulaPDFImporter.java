@@ -24,7 +24,7 @@ public class TabulaPDFImporter implements PDFImporter {
 
 
     @Override
-    public boolean importPDF(String PDFFile) {
+    public boolean importPDF(File PDFFile) {
 
         //Rectangle PortraitDatesPageArea = new Rectangle(55.0f,150.0f,1000.0f,40.0f);
         //Rectangle LandscapeDatesPageArea = new Rectangle(40.0f,150.0f,1000.0f,40.0f);

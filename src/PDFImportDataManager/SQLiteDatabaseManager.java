@@ -2,6 +2,7 @@ package PDFImportDataManager;
 
 import org.sqlite.SQLiteConfig;
 
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,7 +19,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public boolean createDatabase(String DBFile){
+    public boolean createDatabase(File DBFile){
         try {
             Class.forName("org.sqlite.JDBC");
             DBConnection = DriverManager.getConnection("jdbc:sqlite:" + DBFile, enableForeignKeysConfig.toProperties());
@@ -33,7 +34,9 @@ public class SQLiteDatabaseManager implements DatabaseManager {
                 "CREATE TABLE Entries (" +
                     "ENTRY_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "ENTRY_MONTH INTEGER," +
-                    "ENTRY_YEAR INTEGER" +
+                    "ENTRY_YEAR INTEGER," +
+                    "START_DAY INTEGER," +
+                    "END_DAY INTEGER" +
                 ");";
             String createTableThree =
                 "CREATE TABLE EntryData (" +
@@ -58,7 +61,6 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             createDatabaseStatement.execute(createTableOne);
             createDatabaseStatement.execute(createTableTwo);
             createDatabaseStatement.execute(createTableThree);
-
             DBConnection.close();
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -69,10 +71,12 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public boolean openDatabase(String DBFile){
+    public boolean openDatabase(File DBFile){
         try {
             Class.forName("org.sqlite.JDBC");
             DBConnection = DriverManager.getConnection("jdbc:sqlite:" + DBFile, enableForeignKeysConfig.toProperties());
+            //Test to make sure the file opened is a database file
+            DBConnection.createStatement().execute("SELECT * FROM CompanyInfo");
         } catch ( Exception e ) {
             e.printStackTrace();
             return false;
@@ -99,17 +103,20 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public Map getEntryInfo(String entryID) {
-        //Returns a mapping of Month and Year to integers
+    public Map<String, Integer> getEntryInfo(String entryID) {
+        //Returns a mapping of Month, Year, Start_Day, and End_Day to integers
         Map<String, Integer> result = new HashMap<>();
         int entryIDInt = Integer.parseInt(entryID);
         try {
-            String statementString = "SELECT ENTRY_MONTH, ENTRY_YEAR FROM Entries where ENTRY_ID = ?;";
+            String statementString = "SELECT ENTRY_MONTH, ENTRY_YEAR, START_DAY, END_DAY FROM Entries where ENTRY_ID = ?;";
             PreparedStatement getEntryInfoStatement = DBConnection.prepareStatement(statementString);
             getEntryInfoStatement.setInt(1, entryIDInt);
+            getEntryInfoStatement.execute();
             ResultSet entriesSet = getEntryInfoStatement.getResultSet();
             result.put("Month", entriesSet.getInt("ENTRY_MONTH"));
             result.put("Year", entriesSet.getInt("ENTRY_YEAR"));
+            result.put("Start_Day", entriesSet.getInt("START_DAY"));
+            result.put("End_Day", entriesSet.getInt("END_DAY"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -117,9 +124,9 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public List<Map> getEntry(String entryID) {
+    public List<Map<String, Integer>> getEntry(String entryID) {
         Map<String, Integer> basicEntries = new HashMap<String, Integer>();
-        List<Map> result = new ArrayList<>();
+        List<Map<String, Integer>> result = new ArrayList<>();
         int entryIDInt = Integer.parseInt(entryID);
         try {
             String statementString = "SELECT * FROM EntryData where ENTRY_ID = ?;";
@@ -161,7 +168,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public Map getCompanyInfo(){
+    public Map<String, String> getCompanyInfo(){
         Map<String, String> result = new HashMap<String, String>();
         try {
             Statement getEntryListStatement = DBConnection.createStatement();
@@ -205,10 +212,12 @@ public class SQLiteDatabaseManager implements DatabaseManager {
         try{
 
             //Add entry
-            String addNewEntryStatementString = "INSERT INTO Entries VALUES(NULL, ?, ?)";
+            String addNewEntryStatementString = "INSERT INTO Entries VALUES(NULL, ?, ?, ?, ?)";
             PreparedStatement addNewEntryStatement = DBConnection.prepareStatement(addNewEntryStatementString);
             addNewEntryStatement.setInt(1, normalData.get("Start_Month"));
             addNewEntryStatement.setInt(2, normalData.get("Start_Year"));
+            addNewEntryStatement.setInt(3, normalData.get("Start_Day"));
+            addNewEntryStatement.setInt(4, normalData.get("End_Day"));
             addNewEntryStatement.execute();
 
             String addEntryInfoStatementString = "INSERT INTO Entries VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

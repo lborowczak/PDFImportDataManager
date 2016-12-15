@@ -3,6 +3,7 @@ package PDFImportDataManager;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -21,8 +22,8 @@ public class ImportedDataManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        testPortraitImportedDataManager.importPDF("tst/Example_report_sent_in_portrait.pdf");
-        testLandscapeImportedDataManager.importPDF("tst/Example_report_sent_in_landscape.pdf");
+        testPortraitImportedDataManager.importPDF(new File("tst/Example_report_sent_in_portrait.pdf"));
+        testLandscapeImportedDataManager.importPDF(new File("tst/Example_report_sent_in_landscape.pdf"));
     }
 
     @Test
