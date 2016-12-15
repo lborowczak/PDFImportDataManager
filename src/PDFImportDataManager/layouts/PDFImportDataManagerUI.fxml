@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.76-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="PDFImportDataManager.MainUIController">
+   <children>
+      <MenuBar>
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem fx:id="importPDFMenuItem" mnemonicParsing="false" onAction="#onImportPDFMenuItemPressed" text="Import PDF" />
+                  <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" onAction="#onCloseMenuItemPressed" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" onAction="#onAboutMenuItemPressed" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <SplitPane dividerPositions="0.333333333333" prefHeight="573.0" prefWidth="800.0">
+         <items>
+            <Accordion fx:id="mainAccordion" />
+            <VBox>
+               <children>
+                  <VBox>
+                     <children>
+                        <TextFlow textAlignment="CENTER">
+                           <children>
+                              <Text fx:id="EntryInfoText" strokeType="OUTSIDE" strokeWidth="0.0" text="Entry Info:&#10;Week dates: 10/02/16 - 10/08/16&#10;Deposit Payment Date: 10/12.16&#10;Gross Pay: $1000.00&#10;F/W: $120.00&#10;S/W: $50.00&#10;Total Deposit: $200.00" textAlignment="CENTER" />
+                           </children>
+                        </TextFlow>
+                     </children>
+                  </VBox>
+                  <Separator prefWidth="200.0" />
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Available Actions:">
+                     <VBox.margin>
+                        <Insets bottom="10.0" top="10.0" />
+                     </VBox.margin></Text>
+                  <GridPane>
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Button mnemonicParsing="false" text="Generate Report from selected entry..." GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
+                        <Button mnemonicParsing="false" text="Edit selected entry..." GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" text="Delete selected entry" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" />
+                     </children>
+                  </GridPane>
+               </children>
+            </VBox>
+         </items>
+      </SplitPane>
+   </children>
+</VBox>
