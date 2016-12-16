@@ -86,9 +86,9 @@ public class ImportedDataManager {
 
 
     private void parseData(List<List<List<String>>> dataToParse){
-
+        List<List<String>> combinedPageData = new ArrayList<>();
         for (List<List<String>> currPage : dataToParse) {
-            System.out.println(currPage);
+
         }
     }
 

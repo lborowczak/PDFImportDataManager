@@ -6,14 +6,22 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.pdfbox.util.operator.GRestore;
 
 import java.io.File;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class MainUIController {
 
@@ -82,22 +90,33 @@ public class MainUIController {
 
 
     public void onEditEntryPressed(ActionEvent actionEvent) {
+        Dialog editDialog = createEntryEditorDialog(mainManager.getEntryData(currItem.getIDString()));
+        editDialog.showAndWait();
     }
 
     public void onDeleteEntryPressed(ActionEvent actionEvent) {
-    }
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Deletion");
+        alert.setHeaderText("Confirm entry deletion");
+        alert.setContentText("Are you sure you want to delete this entry?");
 
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.OK){
+            mainManager.deleteEntry(currItem.getIDString());
+        }
+        mainAccordion.getPanes().removeAll(mainAccordion.getPanes());
+        loadData();
+    }
 
     private void loadData(){
         //Data structure:
         //Map<Year, Map<MonthName, Map<WeekString, entryID>
         Map<Integer, Map<String, Map<String, String>>> entryList = mainManager.getOverview();
-
         entryList.forEach( (k,v) -> addYearAccordion(k, v, mainAccordion));
-
     }
 
     private void addYearAccordion(Integer year, Map<String, Map<String, String>> months, Accordion accordionToPopulate) {
+        System.out.println("Entries:" + months);
         Accordion yearAccordion = new Accordion();
         TitledPane yearPane = new TitledPane(year.toString(), yearAccordion);
         months.forEach( (k, v) -> addMonthTitledPane(k, v, yearAccordion));
@@ -106,7 +125,7 @@ public class MainUIController {
     }
 
     private void addMonthTitledPane(String month, Map<String, String> monthEntries, Accordion accordionToPopulate) {
-
+        System.out.println("Entries:" + monthEntries);
         ObservableList<listItem> monthEntriesList = FXCollections.observableArrayList();
         final ListView<listItem> monthEntriesListView = new ListView<listItem>(monthEntriesList);
         monthEntriesListView.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -132,6 +151,111 @@ public class MainUIController {
         accordionToPopulate.getPanes().add(monthPane);
     }
 
+
+    private Dialog<Map<String, String>> createEntryEditorDialog(List<Map<String, Integer>> currDataList){
+        Map<String, Integer> currData = currDataList.get(0);
+        Map<String, Integer> extraData = currDataList.get(1);
+
+        //Create DecimalFormatter to round numbers to 2 digits
+        DecimalFormat df = new DecimalFormat("0.00");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+
+        Dialog<Map<String, String>> enterCompanyInfoDialog = new Dialog<>();
+        enterCompanyInfoDialog.setHeaderText("Edit entry");
+        enterCompanyInfoDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        GridPane dialogGridPane = new GridPane();
+        dialogGridPane.setHgap(10);
+        dialogGridPane.setVgap(10);
+        dialogGridPane.setAlignment(Pos.CENTER);
+        dialogGridPane.add(new Label("Start date day: "), 0, 0);
+        dialogGridPane.add(new Label("Start date month: "), 0, 1);
+        dialogGridPane.add(new Label("Start date year: "), 0, 2);
+        dialogGridPane.add(new Label("End date day: "), 0, 3);
+        dialogGridPane.add(new Label("End date month: "), 0, 4);
+        dialogGridPane.add(new Label("End date year: "), 0, 5);
+        dialogGridPane.add(new Label("Pay date day: "), 0, 6);
+        dialogGridPane.add(new Label("Pay date month: "), 0, 7);
+        dialogGridPane.add(new Label("Pay date year: "), 0, 8);
+        dialogGridPane.add(new Label("Gross Pay: "), 0, 9);
+        dialogGridPane.add(new Label("Federal Withholding"), 0, 10);
+        dialogGridPane.add(new Label("State Withholding"), 0, 11);
+        dialogGridPane.add(new Label("Medicare Withholding"), 0, 12);
+        dialogGridPane.add(new Label("Social Security Withholding"), 0, 13);
+
+        /*
+        int tmpInt = 14;
+        for(Map.Entry<String, Integer> entry : extraData.entrySet()){
+            dialogGridPane.add(new Label(entry.getKey()), 0, tmpInt);
+            TextField tmpField = new TextField(df.format(entry.getValue() / 100.0 ));
+            GridPane.setConstraints(tmpField, 1, tmpInt);
+            dialogGridPane.getChildren().add(tmpField);
+            tmpInt++;
+        };*/
+
+        TextField startDayField = new TextField(currData.get("Start_Day").toString());
+        TextField startMonthField = new TextField(currData.get("Start_Month").toString());
+        TextField startYearField = new TextField(currData.get("Start_Year").toString());
+        TextField endDayField = new TextField(currData.get("End_Day").toString());
+        TextField endMonthField = new TextField(currData.get("End_Month").toString());
+        TextField endYearField = new TextField(currData.get("End_Year").toString());
+        TextField payDayField = new TextField(currData.get("Pay_Day").toString());
+        TextField payMonthField = new TextField(currData.get("Pay_Month").toString());
+        TextField payYearField = new TextField(currData.get("Pay_Year").toString());
+        TextField grossPayField = new TextField(df.format(currData.get("Gross_Pay") / 100.0));
+        TextField federalWithholdingField = new TextField(df.format(currData.get("Federal_Withholding") / 100.0));
+        TextField stateWithholdingField = new TextField(df.format(currData.get("State_Withholding") / 100.0 ));
+        TextField medicareEmployeeWithholdingField = new TextField(df.format(currData.get("Medicare_Employee_Withholding") / 100.0));
+        TextField socialSecurityWithholdingField = new TextField(df.format(currData.get("Social_Security_Employee_Withholding") / 100.0));
+
+
+        GridPane.setConstraints(startDayField, 1, 0);
+        GridPane.setConstraints(startMonthField, 1, 1);
+        GridPane.setConstraints(startYearField, 1, 2);
+        GridPane.setConstraints(endDayField, 1, 3);
+        GridPane.setConstraints(endMonthField, 1, 4);
+        GridPane.setConstraints(endYearField, 1, 5);
+        GridPane.setConstraints(payDayField, 1, 6);
+        GridPane.setConstraints(payMonthField, 1, 7);
+        GridPane.setConstraints(payYearField, 1, 8);
+        GridPane.setConstraints(grossPayField, 1, 9);
+        GridPane.setConstraints(federalWithholdingField, 1, 10);
+        GridPane.setConstraints(stateWithholdingField, 1, 11);
+        GridPane.setConstraints(medicareEmployeeWithholdingField, 1, 12);
+        GridPane.setConstraints(socialSecurityWithholdingField, 1, 13);
+        dialogGridPane.getChildren().addAll(startDayField, startMonthField, startYearField,
+                endDayField, endMonthField, endYearField,
+                payDayField, payMonthField, payYearField,
+                grossPayField, federalWithholdingField, stateWithholdingField,
+                medicareEmployeeWithholdingField, socialSecurityWithholdingField);
+        enterCompanyInfoDialog.getDialogPane().setContent(dialogGridPane);
+
+        enterCompanyInfoDialog.setResultConverter(clickedButton -> {
+            if (clickedButton == ButtonType.OK) {
+                Map<String, String> tmpReturnMap = new HashMap<String, String>();
+                tmpReturnMap.put("Start_Day", startDayField.getText());
+                tmpReturnMap.put("Start_Month", startMonthField.getText());
+                tmpReturnMap.put("Start_Year", startYearField.getText());
+                tmpReturnMap.put("End_Day", endDayField.getText());
+                tmpReturnMap.put("End_Month", endMonthField.getText());
+                tmpReturnMap.put("End_Year", endYearField.getText());
+                tmpReturnMap.put("Pay_Day", payDayField.getText());
+                tmpReturnMap.put("Pay_Month", payMonthField.getText());
+                tmpReturnMap.put("Pay_Year", payYearField.getText());
+                tmpReturnMap.put("Gross_Pay", grossPayField.getText());
+                tmpReturnMap.put("Federal_Withholding", federalWithholdingField.getText());
+                tmpReturnMap.put("State_Withholding", stateWithholdingField.getText());
+                tmpReturnMap.put("Medicare_Employee_Withholding", medicareEmployeeWithholdingField.getText());
+                tmpReturnMap.put("Social_Security_Employee_Withholding", socialSecurityWithholdingField.getText());
+                return tmpReturnMap;
+            }
+            return null;
+        });
+
+        return enterCompanyInfoDialog;
+    }
+
+
+
     private class listItem{
         private String displayString;
         private String IDString;
@@ -151,6 +275,9 @@ public class MainUIController {
         }
 
     }
+
+
+
 
 }
 

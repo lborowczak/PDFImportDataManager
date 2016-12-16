@@ -1,5 +1,6 @@
 package PDFImportDataManager;
 
+import PDFImportDataManager.Controllers.MainUIController;
 import PDFImportDataManager.DatabaseManager.SQLiteDatabaseManager;
 import PDFImportDataManager.ReportGenerator.PDFReportGenerator;
 import PDFImportDataManager.interfaces.DatabaseManager;
@@ -75,12 +76,6 @@ public class DataManager {
         return globalReportGenerator.outputReport(PDFFile);
     }
 
-    private boolean checkValidFile(String filename, boolean isNew){
-        File toBeChecked = new File(filename);
-        return toBeChecked.canWrite();
-
-    }
-
     private void calculateDeposit(double grossPay, double federalWithholding){
         calculatedDeposit = grossPay * taxPercent + federalWithholding;
     }
@@ -90,26 +85,35 @@ public class DataManager {
         //Map<Year, Map<MonthName, Map<Week, entryID>>>>
         Map <Integer, Map<String, Map<String, String>>> returnMap = new HashMap<>();
         for (String ID: globalDBManager.getEntryList()) {
-            Map<String, String> tmpDatesToIDMap = new HashMap<>();
-            Map<String, Map <String, String>> tmpMonthNamesMap = new HashMap<>();
+            System.out.println("ID: " + ID);
             Map<String, Integer> tmpEntryInfo = globalDBManager.getEntryInfo(ID);
             int tmpMonth = tmpEntryInfo.get("Month");
             String tmpMonthName = new DateFormatSymbols().getMonths()[tmpMonth-1];
             int tmpYear = tmpEntryInfo.get("Year");
             int tmpStartDay = tmpEntryInfo.get("Start_Day");
+
+            Map<String, Map <String, String>> tmpMonthNamesMap = returnMap.getOrDefault(tmpYear, new HashMap<>());
+            Map<String, String> tmpDatesToIDMap = tmpMonthNamesMap.getOrDefault(tmpMonthName, new HashMap<>());
+            System.out.println("MonthsMap: " + tmpMonthNamesMap);
+
             tmpDatesToIDMap.put("Week of " + tmpMonthName + " " + tmpStartDay, ID);
             tmpMonthNamesMap.put(tmpMonthName, tmpDatesToIDMap);
             returnMap.put(tmpYear, tmpMonthNamesMap);
+            System.out.println("ReturnMap: " + returnMap);
         }
         return returnMap;
     }
 
-    public String getFormattedEntryData(String ID) {
+    public List<Map<String, Integer>> getEntryData(String entryID){
+        return globalDBManager.getEntry(entryID);
+    }
+
+    public String getFormattedEntryData(String entryID) {
         //Create DecimalFormatter to round numbers to 2 digits
-        DecimalFormat df = new DecimalFormat("#.00");
+        DecimalFormat df = new DecimalFormat("0.00");
         df.setRoundingMode(RoundingMode.HALF_UP);
         String returnString = "";
-        List<Map<String, Integer>> returnedData = globalDBManager.getEntry(ID);
+        List<Map<String, Integer>> returnedData = globalDBManager.getEntry(entryID);
         Map<String, Integer> data = returnedData.get(0);
         returnString = "Entry info:\n";
         returnString += "Week Dates: " + data.get("Start_Month") + "/" + data.get("Start_Day") + "/" + data.get("Start_Year") + " - "
@@ -121,4 +125,11 @@ public class DataManager {
 
         return returnString;
     }
+
+    public void deleteEntry(String entryID) {
+        globalDBManager.removeEntry(entryID);
+    }
 }
+
+
+

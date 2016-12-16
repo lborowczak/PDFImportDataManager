@@ -20,93 +20,138 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public boolean createDatabase(File DBFile, Map<String, String> companyInfo){
+    public boolean createDatabase(File DBFile, Map<String, String> companyInfo) {
+        boolean returnVal = true;
+        Statement createDatabaseStatement = null;
+        PreparedStatement setCompanyInfoStatement = null;
         try {
             Class.forName("org.sqlite.JDBC");
             DBConnection = DriverManager.getConnection("jdbc:sqlite:" + DBFile, enableForeignKeysConfig.toProperties());
-            Statement createDatabaseStatement = DBConnection.createStatement();
+            createDatabaseStatement = DBConnection.createStatement();
             String createTableOne =
-                "CREATE TABLE CompanyInfo (" +
-                    "COMPANY_NAME TEXT," +
-                    "COMPANY_EIN TEXT," +
-                    "COMPANY_PIN TEXT" +
-                ");";
+                    "CREATE TABLE CompanyInfo (" +
+                            "COMPANY_NAME TEXT," +
+                            "COMPANY_EIN TEXT," +
+                            "COMPANY_PIN TEXT" +
+                            ");";
             String createTableTwo =
-                "CREATE TABLE Entries (" +
-                    "ENTRY_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "ENTRY_MONTH INTEGER," +
-                    "ENTRY_YEAR INTEGER," +
-                    "START_DAY INTEGER" +
-                ");";
+                    "CREATE TABLE Entries (" +
+                            "ENTRY_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                            "ENTRY_MONTH INTEGER," +
+                            "ENTRY_YEAR INTEGER," +
+                            "START_DAY INTEGER" +
+                            ");";
             String createTableThree =
-                "CREATE TABLE EntryData (" +
-                    "Start_Day INTEGER," +
-                    "Start_Month INTEGER," +
-                    "Start_Year INTEGER," +
-                    "End_Day INTEGER," +
-                    "End_Month INTEGER," +
-                    "End_Year INTEGER," +
-                    "Pay_Day INTEGER," +
-                    "Pay_Month INTEGER," +
-                    "Pay_Year INTEGER," +
-                    "Gross_Pay_In_Cents INTEGER," +
-                    "Gross_Breakdown_Info TEXT," +
-                    "Federal_Withholding_In_Cents INTEGER," +
-                    "Medicare_Employee_Withholding_In_Cents INTEGER," +
-                    "Social_Security_Employee_Withholding_In_Cents INTEGER," +
-                    "State_Withholding_In_Cents INTEGER," +
-                    "CURR_ENTRY_ID INTEGER PRIMARY KEY," +
-                    "FOREIGN KEY (CURR_ENTRY_ID) REFERENCES Entries(ENTRY_ID)" +
-                ");";
+                    "CREATE TABLE EntryData (" +
+                            "Start_Day INTEGER," +
+                            "Start_Month INTEGER," +
+                            "Start_Year INTEGER," +
+                            "End_Day INTEGER," +
+                            "End_Month INTEGER," +
+                            "End_Year INTEGER," +
+                            "Pay_Day INTEGER," +
+                            "Pay_Month INTEGER," +
+                            "Pay_Year INTEGER," +
+                            "Gross_Pay_In_Cents INTEGER," +
+                            "Gross_Breakdown_Info TEXT," +
+                            "Federal_Withholding_In_Cents INTEGER," +
+                            "Medicare_Employee_Withholding_In_Cents INTEGER," +
+                            "Social_Security_Employee_Withholding_In_Cents INTEGER," +
+                            "State_Withholding_In_Cents INTEGER," +
+                            "CURR_ENTRY_ID INTEGER PRIMARY KEY," +
+                            "FOREIGN KEY (CURR_ENTRY_ID) REFERENCES Entries(ENTRY_ID)" +
+                            ");";
             createDatabaseStatement.execute(createTableOne);
             createDatabaseStatement.execute(createTableTwo);
             createDatabaseStatement.execute(createTableThree);
 
             String setCompanyInfoString = "INSERT INTO CompanyInfo VALUES(?, ?, ?)";
-            PreparedStatement setCompanyInfoStatement = DBConnection.prepareStatement(setCompanyInfoString);
+            setCompanyInfoStatement = DBConnection.prepareStatement(setCompanyInfoString);
             setCompanyInfoStatement.setString(1, companyInfo.get("Company_Name"));
             setCompanyInfoStatement.setString(2, companyInfo.get("Company_EIN"));
             setCompanyInfoStatement.setString(3, companyInfo.get("Company_PIN"));
-            setCompanyInfoStatement.execute();
+            setCompanyInfoStatement.executeUpdate();
 
 
             DBConnection.close();
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
-            return false;
+            returnVal = false;
+        } finally {
+            if (createDatabaseStatement != null) {
+                try {
+                    createDatabaseStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (setCompanyInfoStatement != null) {
+                try {
+                    setCompanyInfoStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-
-        return true;
+        return returnVal;
     }
 
     @Override
-    public boolean openDatabase(File DBFile){
+    public boolean openDatabase(File DBFile) {
+        boolean returnVal = true;
+        Statement testStatement = null;
         try {
             Class.forName("org.sqlite.JDBC");
             DBConnection = DriverManager.getConnection("jdbc:sqlite:" + DBFile, enableForeignKeysConfig.toProperties());
             //Test to make sure the file opened is a database file
-            DBConnection.createStatement().execute("SELECT * FROM CompanyInfo");
-        } catch ( Exception e ) {
+            testStatement = DBConnection.createStatement();
+            testStatement.execute("SELECT * FROM CompanyInfo");
+
+        } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            returnVal = false;
         }
-        return true;
+        finally {
+            if (testStatement != null){
+                try {
+                    testStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return returnVal;
     }
 
     @Override
-    public List<String> getEntryList(){
+    public List<String> getEntryList() {
         List<String> result = new ArrayList<>();
+        Statement getEntryListStatement = null;
+        ResultSet entriesSet = null;
         try {
-            Statement getEntryListStatement = DBConnection.createStatement();
+            getEntryListStatement = DBConnection.createStatement();
             String statementString = "SELECT ENTRY_ID FROM Entries;";
-            ResultSet entriesSet = getEntryListStatement.executeQuery(statementString);
-            while (entriesSet.next()){
+            entriesSet = getEntryListStatement.executeQuery(statementString);
+            while (entriesSet.next()) {
                 result.add("" + entriesSet.getInt("ENTRY_ID"));
             }
-
-
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (getEntryListStatement != null) {
+                try {
+                    getEntryListStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (entriesSet != null) {
+                try {
+                    entriesSet.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return result;
     }
@@ -115,19 +160,37 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     public Map<String, Integer> getEntryInfo(String entryID) {
         //Returns a mapping of Month, Year, Start_Day, and End_Day to integers
         Map<String, Integer> result = new HashMap<String, Integer>();
+        PreparedStatement getEntryInfoStatement = null;
+        ResultSet entriesSet = null;
         int entryIDInt = Integer.parseInt(entryID);
         try {
             String statementString = "SELECT ENTRY_MONTH, ENTRY_YEAR, START_DAY FROM Entries where ENTRY_ID = ?;";
-            PreparedStatement getEntryInfoStatement = DBConnection.prepareStatement(statementString);
+            getEntryInfoStatement = DBConnection.prepareStatement(statementString);
             getEntryInfoStatement.setInt(1, entryIDInt);
             getEntryInfoStatement.execute();
-            ResultSet entriesSet = getEntryInfoStatement.getResultSet();
+            entriesSet = getEntryInfoStatement.getResultSet();
             result.put("Month", entriesSet.getInt("ENTRY_MONTH"));
             result.put("Year", entriesSet.getInt("ENTRY_YEAR"));
             result.put("Start_Day", entriesSet.getInt("START_DAY"));
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (getEntryInfoStatement != null) {
+                try {
+                    getEntryInfoStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (entriesSet != null) {
+                try {
+                    entriesSet.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+
         return result;
     }
 
@@ -136,12 +199,14 @@ public class SQLiteDatabaseManager implements DatabaseManager {
         Map<String, Integer> basicEntries = new HashMap<String, Integer>();
         List<Map<String, Integer>> result = new ArrayList<>();
         int entryIDInt = Integer.parseInt(entryID);
+        PreparedStatement getEntryStatement = null;
+        ResultSet entriesSet = null;
         try {
             String statementString = "SELECT * FROM EntryData where CURR_ENTRY_ID = ?;";
-            PreparedStatement getEntryInfoStatement = DBConnection.prepareStatement(statementString);
-            getEntryInfoStatement.setInt(1, entryIDInt);
-            getEntryInfoStatement.execute();
-            ResultSet entriesSet = getEntryInfoStatement.getResultSet();
+            getEntryStatement = DBConnection.prepareStatement(statementString);
+            getEntryStatement.setInt(1, entryIDInt);
+            getEntryStatement.execute();
+            entriesSet = getEntryStatement.getResultSet();
             basicEntries.put("Start_Day", entriesSet.getInt("Start_Day"));
             basicEntries.put("Start_Month", entriesSet.getInt("Start_Month"));
             basicEntries.put("Start_Year", entriesSet.getInt("Start_Year"));
@@ -149,7 +214,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             basicEntries.put("End_Month", entriesSet.getInt("End_Month"));
             basicEntries.put("End_Year", entriesSet.getInt("End_Year"));
             basicEntries.put("Pay_Day", entriesSet.getInt("Pay_Day"));
-            basicEntries.put("Pay_Month",  entriesSet.getInt("Pay_Month"));
+            basicEntries.put("Pay_Month", entriesSet.getInt("Pay_Month"));
             basicEntries.put("Pay_Year", entriesSet.getInt("Pay_Year"));
             basicEntries.put("Gross_Pay", entriesSet.getInt("Gross_Pay_In_Cents"));
             basicEntries.put("Federal_Withholding", entriesSet.getInt("Federal_Withholding_In_Cents"));
@@ -164,30 +229,63 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             //It is as follows: Entry1,Entry1Amount;Entry2,Entry2Amount; ...
             Map<String, Integer> breakdownMap = new HashMap<String, Integer>();
             String breakdownInfo = entriesSet.getString("Gross_Breakdown_Info");
-            for (String breakdownLine: breakdownInfo.split(";")){
+            for (String breakdownLine : breakdownInfo.split(";")) {
                 String[] lineEntries = breakdownLine.split(",");
-                breakdownMap.put(lineEntries[0], ((Double)(Double.parseDouble(lineEntries[1]) * 100)).intValue());
+                breakdownMap.put(lineEntries[0], ((Double) (Double.parseDouble(lineEntries[1]) * 100)).intValue());
             }
             result.add(breakdownMap);
-
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+
+            if (getEntryStatement != null) {
+                try {
+                    getEntryStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (entriesSet != null) {
+                try {
+                    entriesSet.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return result;
     }
 
     @Override
-    public Map<String, String> getCompanyInfo(){
+    public Map<String, String> getCompanyInfo() {
         Map<String, String> result = new HashMap<String, String>();
+        Statement getEntryListStatement = null;
+        ResultSet entriesSet = null;
         try {
-            Statement getEntryListStatement = DBConnection.createStatement();
+            getEntryListStatement = DBConnection.createStatement();
             String statementString = "SELECT * FROM CompanyInfo;";
-            ResultSet entriesSet = getEntryListStatement.executeQuery(statementString);
+            entriesSet = getEntryListStatement.executeQuery(statementString);
             result.put("Company_Name", entriesSet.getString("COMPANY_NAME"));
             result.put("Company_EIN", entriesSet.getString("COMPANY_EIN"));
             result.put("Company_PIN", entriesSet.getString("COMPANY_PIN"));
+
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (getEntryListStatement != null) {
+                try {
+                    getEntryListStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (entriesSet != null) {
+                try {
+                    entriesSet.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return result;
     }
@@ -195,41 +293,57 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     @Override
     public boolean removeEntry(String entryID) {
         int entryIDInt = Integer.parseInt(entryID);
+        PreparedStatement deleteEntryDataStatement = null, deleteEntryStatement = null;
         try {
             String statementString1 = "DELETE FROM EntryData WHERE CURR_ENTRY_ID = ?;";
             String statementString2 = "DELETE FROM Entries WHERE ENTRY_ID = ?;";
-            PreparedStatement deleteEntryDataStatement = DBConnection.prepareStatement(statementString1);
-            PreparedStatement deleteEntryStatement = DBConnection.prepareStatement(statementString2);
+            deleteEntryDataStatement = DBConnection.prepareStatement(statementString1);
+            deleteEntryStatement = DBConnection.prepareStatement(statementString2);
             deleteEntryDataStatement.setInt(1, entryIDInt);
+            deleteEntryDataStatement.executeUpdate();
             deleteEntryStatement.setInt(1, entryIDInt);
-            deleteEntryDataStatement.execute();
-            deleteEntryStatement.execute();
-
+            deleteEntryStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        } finally {
+            if (deleteEntryDataStatement != null) {
+                try {
+                    deleteEntryDataStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (deleteEntryStatement != null) {
+                try {
+                    deleteEntryStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-
         return true;
 
     }
 
     @Override
     public boolean addEntry(List<Map> data) {
-        Map<String, Integer> normalData = data.get(1);
-        Map<String, Integer> extraData = data.get(2);
-        try{
-
+        boolean returnVal = true;
+        Map<String, Integer> normalData = data.get(0);
+        Map<String, Integer> extraData = data.get(1);
+        PreparedStatement addNewEntryStatement = null, addEntryInfoStatement = null;
+        ResultSet rowID = null;
+        try {
             //Add entry
             String addNewEntryStatementString = "INSERT INTO Entries VALUES(NULL, ?, ?, ?)";
-            PreparedStatement addNewEntryStatement = DBConnection.prepareStatement(addNewEntryStatementString);
+            addNewEntryStatement = DBConnection.prepareStatement(addNewEntryStatementString);
             addNewEntryStatement.setInt(1, normalData.get("Start_Month"));
             addNewEntryStatement.setInt(2, normalData.get("Start_Year"));
             addNewEntryStatement.setInt(3, normalData.get("Start_Day"));
-            addNewEntryStatement.execute();
+            addNewEntryStatement.executeUpdate();
 
             String addEntryInfoStatementString = "INSERT INTO Entries VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement addEntryInfoStatement = DBConnection.prepareStatement(addNewEntryStatementString);
+            addEntryInfoStatement = DBConnection.prepareStatement(addNewEntryStatementString);
             addEntryInfoStatement.setInt(1, normalData.get("Start_Day"));
             addEntryInfoStatement.setInt(2, normalData.get("Start_Month"));
             addEntryInfoStatement.setInt(3, normalData.get("Start_Year"));
@@ -243,7 +357,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
 
             //Build Gross_Breakdown_Info string for insertion into database
             final StringBuilder grossBreakdownInfoString = new StringBuilder();
-            extraData.forEach( (k,v) -> grossBreakdownInfoString.append(k + "," + v + ";") );
+            extraData.forEach((k, v) -> grossBreakdownInfoString.append(k + "," + v + ";"));
             addEntryInfoStatement.setString(11, grossBreakdownInfoString.toString());
 
 
@@ -253,14 +367,35 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             addEntryInfoStatement.setInt(15, normalData.get("State_Withholding"));
 
             //Get and set ID of the entry info
-            ResultSet rowID =  DBConnection.createStatement().executeQuery("SELECT last_insert_rowid();");
+            rowID = DBConnection.createStatement().executeQuery("SELECT last_insert_rowid();");
             addEntryInfoStatement.setInt(16, rowID.getInt(1));
-
+            returnVal = true;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            returnVal = false;
+        } finally {
+            if (addNewEntryStatement != null) {
+                try {
+                    addEntryInfoStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (addEntryInfoStatement != null) {
+                try {
+                    addEntryInfoStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (rowID != null) {
+                try {
+                    rowID.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        return false;
+        return returnVal;
     }
-
 }

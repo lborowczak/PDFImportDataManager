@@ -88,6 +88,7 @@ public class DatabaseChooserController {
     currStage = stage;
 }
 
+
     private Dialog<Map<String, String>> createCompanyInfoDialog(){
         Dialog<Map<String, String>> enterCompanyInfoDialog = new Dialog<>();
         enterCompanyInfoDialog.setHeaderText("Enter the company information");
