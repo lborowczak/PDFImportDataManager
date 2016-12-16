@@ -32,7 +32,7 @@
                      <children>
                         <TextFlow textAlignment="CENTER">
                            <children>
-                              <Text fx:id="entryInfoText" strokeType="OUTSIDE" strokeWidth="0.0" text="Entry Info:&#10;Week dates: 10/02/16 - 10/08/16&#10;Deposit Payment Date: 10/12.16&#10;Gross Pay: $1000.00&#10;F/W: $120.00&#10;S/W: $50.00&#10;Total Deposit: $200.00" textAlignment="CENTER" />
+                              <Text fx:id="entryInfoText" strokeType="OUTSIDE" strokeWidth="0.0" text="No entry selected." textAlignment="CENTER" />
                            </children>
                         </TextFlow>
                      </children>

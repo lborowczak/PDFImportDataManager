@@ -268,7 +268,7 @@ public class PDFImporterTest {
 
     @Test
     public void checkPortraitData() throws Exception{
-        assertEquals(portraitData, testPortraitImporter.getData());
+        assertEquals(portraitData.toString(), testPortraitImporter.getData().toString());
         //assertTrue(Arrays.deepEquals(portraitData.toArray(), testPortraitImporter.getData().toArray()));
     }
 

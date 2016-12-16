@@ -25,7 +25,10 @@ public class TabulaPDFImporter implements PDFImporter {
     @Override
     public boolean importPDF(File PDFFile) {
 
-        //Rectangle PortraitDatesPageArea = new Rectangle(55.0f,150.0f,1000.0f,40.0f);
+        extractedData = new ArrayList<List<List<String>>>();
+        usersData = new ArrayList<List<List<String>>>();
+
+        Rectangle PortraitDatesPageArea = new Rectangle(55.0f,150.0f,1000.0f,40.0f);
         //Rectangle LandscapeDatesPageArea = new Rectangle(40.0f,150.0f,1000.0f,40.0f);
         //Rectangle PortraitDataPageArea = new Rectangle();
         //Rectangle LandscapeDataPageArea = new Rectangle();
@@ -35,10 +38,10 @@ public class TabulaPDFImporter implements PDFImporter {
         //Set areas of the page where the date is.
         Rectangle datesPageArea = new Rectangle(60.0f,150.0f,1000.0f,40.0f);
 
-        Rectangle usersNamesPageArea = new Rectangle(80.0f, 0.0f, 0.0f, 0.0f);
+        Rectangle usersNamesPageArea = new Rectangle(80.0f, 0.0f, 100.0f, 100.0f);
 
         //Set area of the page where the data will be
-        Rectangle itemsDataPageArea = new Rectangle(110.0f,0.0f,1000.0f, 1000.0f);
+        Rectangle itemsDataPageArea = new Rectangle(110.0f,0.0f, 1000.0f, 1000.0f);
 
         //Open the file for import and check if it exists
         try {
@@ -109,6 +112,9 @@ public class TabulaPDFImporter implements PDFImporter {
         List<List<String>> areaData = new ArrayList<List<String>>();
         List<Table> tmpTables = new ArrayList<Table>();
         tmpTables.addAll(basicExtractor.extract(tmpPage));
+        if (tmpTables.isEmpty()){
+            return areaData;
+        }
         for (Table table : tmpTables) {
             for (List<RectangularTextContainer> row : table.getRows()) {
                 List<String> rowData = new ArrayList<String>(row.size());

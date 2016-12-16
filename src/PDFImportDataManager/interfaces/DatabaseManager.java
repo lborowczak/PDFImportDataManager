@@ -16,13 +16,12 @@ public interface DatabaseManager {
     public List<String> getEntryList();
 
     //
-    public Map getEntryInfo(String entryID);
-    public Map getCompanyInfo();
+    public Map<String, Integer> getEntryInfo(String entryID);
+    public Map<String, String> getCompanyInfo();
     public List<Map<String, Integer>> getEntry(String entryID);
     public boolean removeEntry(String entryID);
 
-    public boolean addEntry(List<Map> data);
-    //Format:
+    public boolean addEntry(List<Map<String, Integer>> data);
 
 
 }

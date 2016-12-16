@@ -59,9 +59,14 @@ public class MainUIController {
             case 'c':
                 helper.notifyUser("Warning: The extracted data values did not match.");
                 break;
+            case 'i':
+                helper.notifyUser("The data could not be imported to the database.");
+                return;
             case 'g':
                 helper.notifyUser("PDF imported correctly.");
         }
+        mainAccordion.getPanes().removeAll(mainAccordion.getPanes());
+        loadData();
 
     }
 
@@ -85,7 +90,11 @@ public class MainUIController {
             helper.notifyUser("Cannot write to this file. It may be on a write-protected device.");
             return;
         }
-        mainManager.generateReport(PDFFile, currItem.getIDString());
+        if (!mainManager.generateReport(PDFFile, currItem.getIDString())){
+            helper.notifyUser("Error occurred when generating report.");
+            return;
+        }
+        helper.notifyUser("Report generated successfully.");
     }
 
 
@@ -111,6 +120,10 @@ public class MainUIController {
     private void loadData(){
         //Data structure:
         //Map<Year, Map<MonthName, Map<WeekString, entryID>
+        generateReportButton.setDisable(true);
+        editEntryButton.setDisable(true);
+        deleteEntryButton.setDisable(true);
+
         Map<Integer, Map<String, Map<String, String>>> entryList = mainManager.getOverview();
         entryList.forEach( (k,v) -> addYearAccordion(k, v, mainAccordion));
     }

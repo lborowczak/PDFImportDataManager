@@ -52,7 +52,7 @@ public class DatabaseManagerTest {
     @Test
     public void TestAddEntry() throws Exception {
         int prevSize = testSQLiteDB.getEntryList().size();
-        List<Map> entryList = new ArrayList<>();
+        List<Map<String, Integer>> entryList = new ArrayList<>();
         Map<String, Integer> entry = new HashMap<String, Integer>();
         entry.put("",0);
         entryList.add(entry);

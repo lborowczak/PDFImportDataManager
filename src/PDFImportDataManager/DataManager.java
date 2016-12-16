@@ -23,15 +23,58 @@ public class DataManager {
     private List<Map<String, Integer>> reportData = null;
     private double calculatedDeposit = 0;
     private static double taxPercent = 0.153;
+    private static double socialSecurityPercent = 0.0620;
+    private static double medicarePercent = 0.01450;
+    private static double statePercent = 0.03750;
     //private TripleDate dates = null;
     private static double differenceThreshold = 0.10;
 
-    public boolean checkAmounts() {
-        Map<String, Integer> data = reportData.get(0);
-        calculateDeposit((double)data.get("Gross_Pay") / 100.0, (double)data.get("Federal_Withholding") / 100.0);
-        double checkDepositValue = (((double)data.get("Social_Security_Employee_Withholding") / 100.0 * 2.0) +
-                ((double)data.get("Medicare_Employee_Withholding") / 100.0 * 2) + (double)data.get("Federal_Withholding") / 100.0);
-        return (Math.abs(checkDepositValue - calculatedDeposit) < differenceThreshold );
+    public boolean checkAmounts(List<Map<String, Integer>> data) {
+        boolean isDataCorrect = true;
+        double checkGrossValue = 0.0;
+        double checkSocialSecurity = 0.0;
+        double checkMedicare = 0.0;
+        double checkStateWithholding = 0.0;
+        Map<String, Integer> valuesData = data.get(0);
+        Map<String, Integer> extraData = data.get(1);
+        int storedGross = valuesData.get("Gross_Pay");
+        int storedSocialSecurity = valuesData.get("Social_Security_Employee_Withholding");
+        int storedMedicare = valuesData.get("Medicare_Employee_Withholding");
+        int storedFederalWithholding = valuesData.get("Federal_Withholding");
+        int storedStateWithholding = valuesData.get("State_Withholding");
+
+        //Check that Social Security matches
+        checkSocialSecurity = (double)storedGross * socialSecurityPercent;
+        isDataCorrect = isDataCorrect && (Math.abs(checkSocialSecurity - (double)storedSocialSecurity) < (differenceThreshold * 100.0));
+
+        //Check that Medicare matches
+        checkMedicare = (double)storedGross * medicarePercent;
+        isDataCorrect = isDataCorrect && (Math.abs(checkMedicare - (double)storedMedicare) < (differenceThreshold * 100.0));
+
+        //Check that State Withholding matches
+        checkStateWithholding = (double)storedStateWithholding * statePercent;
+        isDataCorrect = isDataCorrect && (Math.abs(checkMedicare - (double)storedMedicare) < (differenceThreshold * 100.0));
+
+
+        //Check that deposit values match
+        calculateDeposit(
+                (double)storedGross / 100.0, (double)storedFederalWithholding / 100.0
+        );
+
+        double checkDepositValue = (((double)storedSocialSecurity / 100.0 * 2.0) +
+            ((double)storedMedicare / 100.0 * 2) + (double)storedFederalWithholding / 100.0);
+
+        isDataCorrect = isDataCorrect && (Math.abs(checkDepositValue - calculatedDeposit) < differenceThreshold);
+
+        //Check that custom items add up to total gross
+        for(Map.Entry<String, Integer> entry : extraData.entrySet()) {
+            checkGrossValue += entry.getValue();
+        }
+        isDataCorrect = isDataCorrect && (Math.abs(checkGrossValue - storedGross) < (differenceThreshold * 100.0));
+
+
+
+        return isDataCorrect;
     }
 
     public TripleDate getDates(){
@@ -51,10 +94,13 @@ public class DataManager {
         if (!globalImportedDataManager.importPDF(PDFFile)){
             return 'e';
         }
-        //globalImportedDataManager
-
+        if (!globalDBManager.addEntry(globalImportedDataManager.getParsedData())){
+            return 'i';
+        }
+        if (!checkAmounts(globalImportedDataManager.getParsedData())){
+            return 'c';
+        }
         return 'g';
-        //);
     }
 
     public boolean generateReport(File PDFFile, String entryID){

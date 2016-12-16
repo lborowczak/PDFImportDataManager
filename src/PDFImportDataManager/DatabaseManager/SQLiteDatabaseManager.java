@@ -71,9 +71,6 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             setCompanyInfoStatement.setString(2, companyInfo.get("Company_EIN"));
             setCompanyInfoStatement.setString(3, companyInfo.get("Company_PIN"));
             setCompanyInfoStatement.executeUpdate();
-
-
-            DBConnection.close();
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
             returnVal = false;
@@ -91,6 +88,11 @@ public class SQLiteDatabaseManager implements DatabaseManager {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
+            }
+            try {
+                DBConnection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
         return returnVal;
@@ -237,7 +239,6 @@ public class SQLiteDatabaseManager implements DatabaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-
             if (getEntryStatement != null) {
                 try {
                     getEntryStatement.close();
@@ -246,11 +247,11 @@ public class SQLiteDatabaseManager implements DatabaseManager {
                 }
             }
             if (entriesSet != null) {
-                try {
+                /*try {
                     entriesSet.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
-                }
+                }*/
             }
         }
         return result;
@@ -327,7 +328,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     }
 
     @Override
-    public boolean addEntry(List<Map> data) {
+    public boolean addEntry(List<Map<String, Integer>> data) {
         boolean returnVal = true;
         Map<String, Integer> normalData = data.get(0);
         Map<String, Integer> extraData = data.get(1);
@@ -342,8 +343,8 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             addNewEntryStatement.setInt(3, normalData.get("Start_Day"));
             addNewEntryStatement.executeUpdate();
 
-            String addEntryInfoStatementString = "INSERT INTO Entries VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            addEntryInfoStatement = DBConnection.prepareStatement(addNewEntryStatementString);
+            String addEntryInfoStatementString = "INSERT INTO EntryData VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            addEntryInfoStatement = DBConnection.prepareStatement(addEntryInfoStatementString);
             addEntryInfoStatement.setInt(1, normalData.get("Start_Day"));
             addEntryInfoStatement.setInt(2, normalData.get("Start_Month"));
             addEntryInfoStatement.setInt(3, normalData.get("Start_Year"));
@@ -369,6 +370,8 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             //Get and set ID of the entry info
             rowID = DBConnection.createStatement().executeQuery("SELECT last_insert_rowid();");
             addEntryInfoStatement.setInt(16, rowID.getInt(1));
+
+            addEntryInfoStatement.executeUpdate();
             returnVal = true;
         } catch (SQLException e) {
             e.printStackTrace();
