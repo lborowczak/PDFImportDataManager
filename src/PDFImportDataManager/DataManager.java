@@ -51,8 +51,8 @@ public class DataManager {
         isDataCorrect = isDataCorrect && (Math.abs(checkMedicare - (double)storedMedicare) < (differenceThreshold * 100.0));
 
         //Check that State Withholding matches
-        checkStateWithholding = (double)storedStateWithholding * statePercent;
-        isDataCorrect = isDataCorrect && (Math.abs(checkMedicare - (double)storedMedicare) < (differenceThreshold * 100.0));
+        checkStateWithholding = (double)storedGross * statePercent;
+        isDataCorrect = isDataCorrect && (Math.abs(checkStateWithholding - (double)storedStateWithholding) < (differenceThreshold * 100.0));
 
 
         //Check that deposit values match
