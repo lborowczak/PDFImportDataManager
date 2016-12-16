@@ -11,9 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.apache.pdfbox.util.operator.GRestore;
 
 import java.io.File;
 import java.math.RoundingMode;

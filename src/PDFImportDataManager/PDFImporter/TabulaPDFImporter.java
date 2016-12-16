@@ -3,8 +3,8 @@ package PDFImportDataManager.PDFImporter;
 import PDFImportDataManager.interfaces.PDFImporter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import technology.tabula.*;
-import technology.tabula.extractors.ExtractionAlgorithm;
 import technology.tabula.extractors.BasicExtractionAlgorithm;
+import technology.tabula.extractors.ExtractionAlgorithm;
 
 import java.io.File;
 import java.io.IOException;

@@ -10,7 +10,7 @@ import java.io.File;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 
 public class PDFImporterTest {

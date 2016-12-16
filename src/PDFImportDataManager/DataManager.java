@@ -1,6 +1,5 @@
 package PDFImportDataManager;
 
-import PDFImportDataManager.Controllers.MainUIController;
 import PDFImportDataManager.DatabaseManager.SQLiteDatabaseManager;
 import PDFImportDataManager.ReportGenerator.PDFReportGenerator;
 import PDFImportDataManager.interfaces.DatabaseManager;
