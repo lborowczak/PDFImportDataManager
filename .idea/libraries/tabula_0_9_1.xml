@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="tabula-0.9.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/tabula-0.9.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/tabula-0.9.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
