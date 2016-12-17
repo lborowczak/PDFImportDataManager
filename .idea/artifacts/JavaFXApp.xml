@@ -14,10 +14,9 @@
     <root id="root">
       <element id="archive" name="JavaFXApp.jar">
         <element id="module-output" name="PDFImportDataManager" />
-        <element id="file-copy" path="/usr/lib/jvm/java-8-openjdk/jre/lib/ext/jfxrt.jar" />
-        <element id="library" level="project" name="sqlite-jdbc-3.15.1" />
         <element id="library" level="project" name="tabula-0.9.1" />
-        <element id="library" level="project" name="pdfbox-2.0.3" />
+        <element id="library" level="project" name="jfxrt" />
+        <element id="library" level="project" name="sqlite-jdbc-3.15.1" />
       </element>
     </root>
   </artifact>
