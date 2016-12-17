@@ -171,7 +171,7 @@ public class ImportedDataManager {
             }
         }
 
-        System.out.println(fullRows);
+        //System.out.println(fullRows);
 
         List<String> tmpRow = fullRows.get(initialData);
         for (int k = 0; (k < tmpRow.size() / 3); k++) {
@@ -196,23 +196,23 @@ public class ImportedDataManager {
                     }
                     else if (j == grossEndIndex){
                         parsedData.get(currUser).get(0).put("Gross_Pay", currItemValue);
-                        System.out.println(" ... gross total is: " + currItemValue);
+                        //System.out.println(" ... gross total is: " + currItemValue);
                     }
                     else if (j == federalWithholdingIndex){
                         parsedData.get(currUser).get(0).put("Federal_Withholding", currItemValue);
-                        System.out.println(" ... F/W is: " + currItemValue);
+                        //System.out.println(" ... F/W is: " + currItemValue);
                     }
                     else if (j == medicareEmployeeWithholdingIndex){
                         parsedData.get(currUser).get(0).put("Medicare_Employee_Withholding", currItemValue);
-                        System.out.println(" ... Medicare is: " + currItemValue);
+                        //System.out.println(" ... Medicare is: " + currItemValue);
                     }
                     else if (j == socialSecurityWithholdingIndex){
                         parsedData.get(currUser).get(0).put("Social_Security_Employee_Withholding", currItemValue);
-                        System.out.println(" ... Social Security is: " + currItemValue);
+                        //System.out.println(" ... Social Security is: " + currItemValue);
                     }
                     else if (j == stateWithholdingIndex){
                         parsedData.get(currUser).get(0).put("State_Withholding", currItemValue);
-                        System.out.println(" ... S/W is: " + currItemValue);
+                        //System.out.println(" ... S/W is: " + currItemValue);
                     }
                     currUser++;
                 } else {

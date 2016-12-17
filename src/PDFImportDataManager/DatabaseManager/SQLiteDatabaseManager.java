@@ -221,7 +221,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             basicEntries.put("Gross_Pay", entriesSet.getInt("Gross_Pay_In_Cents"));
             basicEntries.put("Federal_Withholding", entriesSet.getInt("Federal_Withholding_In_Cents"));
             basicEntries.put("State_Withholding", entriesSet.getInt("State_Withholding_In_Cents"));
-            basicEntries.put("Medicare_Employee_Withholding", entriesSet.getInt("Federal_Withholding_In_Cents"));
+            basicEntries.put("Medicare_Employee_Withholding", entriesSet.getInt("Medicare_Employee_Withholding_In_Cents"));
             basicEntries.put("Social_Security_Employee_Withholding",
                     entriesSet.getInt("Social_Security_Employee_Withholding_In_Cents"));
 
@@ -233,7 +233,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             String breakdownInfo = entriesSet.getString("Gross_Breakdown_Info");
             for (String breakdownLine : breakdownInfo.split(";")) {
                 String[] lineEntries = breakdownLine.split(",");
-                breakdownMap.put(lineEntries[0], ((Double) (Double.parseDouble(lineEntries[1]) * 100)).intValue());
+                breakdownMap.put(lineEntries[0], Integer.parseInt(lineEntries[1]));
             }
             result.add(breakdownMap);
         } catch (SQLException e) {
@@ -400,5 +400,16 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             }
         }
         return returnVal;
+    }
+
+    @Override
+    public boolean closeDatabase(){
+        try {
+            DBConnection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

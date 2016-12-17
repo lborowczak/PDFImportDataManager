@@ -130,7 +130,7 @@ public class DataManager {
         //Map<Year, Map<MonthName, Map<Week, entryID>>>>
         Map <Integer, Map<String, Map<String, String>>> returnMap = new HashMap<>();
         for (String ID: globalDBManager.getEntryList()) {
-            System.out.println("ID: " + ID);
+            //System.out.println("ID: " + ID);
             Map<String, Integer> tmpEntryInfo = globalDBManager.getEntryInfo(ID);
             int tmpMonth = tmpEntryInfo.get("Month");
             String tmpMonthName = new DateFormatSymbols().getMonths()[tmpMonth-1];
@@ -139,12 +139,9 @@ public class DataManager {
 
             Map<String, Map <String, String>> tmpMonthNamesMap = returnMap.getOrDefault(tmpYear, new HashMap<>());
             Map<String, String> tmpDatesToIDMap = tmpMonthNamesMap.getOrDefault(tmpMonthName, new HashMap<>());
-            System.out.println("MonthsMap: " + tmpMonthNamesMap);
-
             tmpDatesToIDMap.put("Week of " + tmpMonthName + " " + tmpStartDay, ID);
             tmpMonthNamesMap.put(tmpMonthName, tmpDatesToIDMap);
             returnMap.put(tmpYear, tmpMonthNamesMap);
-            System.out.println("ReturnMap: " + returnMap);
         }
         return returnMap;
     }
@@ -173,6 +170,11 @@ public class DataManager {
 
     public void deleteEntry(String entryID) {
         globalDBManager.removeEntry(entryID);
+    }
+
+    public void updateEntry(String entryID, List<Map<String, Integer>> newInfo) {
+        globalDBManager.removeEntry(entryID);
+        globalDBManager.addEntry(newInfo);
     }
 }
 

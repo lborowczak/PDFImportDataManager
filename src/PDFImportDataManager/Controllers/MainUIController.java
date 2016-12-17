@@ -16,10 +16,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class MainUIController {
 
@@ -63,8 +60,7 @@ public class MainUIController {
             case 'g':
                 helper.notifyUser("PDF imported correctly.");
         }
-        mainAccordion.getPanes().removeAll(mainAccordion.getPanes());
-        loadData();
+        resetView();
 
     }
 
@@ -97,8 +93,14 @@ public class MainUIController {
 
 
     public void onEditEntryPressed(ActionEvent actionEvent) {
-        Dialog editDialog = createEntryEditorDialog(mainManager.getEntryData(currItem.getIDString()));
-        editDialog.showAndWait();
+        Dialog<List<Map<String, Integer>>> editDialog = createEntryEditorDialog(mainManager.getEntryData(currItem.getIDString()));
+        Optional<List<Map<String, Integer>>> editedData = editDialog.showAndWait();
+        if (editedData.isPresent()){
+            if (editedData.get() != null){
+                mainManager.updateEntry(currItem.getIDString(), editedData.get());
+                resetView();
+            }
+        }
     }
 
     public void onDeleteEntryPressed(ActionEvent actionEvent) {
@@ -108,9 +110,15 @@ public class MainUIController {
         alert.setContentText("Are you sure you want to delete this entry?");
 
         Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.OK){
-            mainManager.deleteEntry(currItem.getIDString());
+        if (result.isPresent()) {
+            if (result.get() == ButtonType.OK) {
+                mainManager.deleteEntry(currItem.getIDString());
+                resetView();
+            }
         }
+    }
+
+    private void resetView(){
         mainAccordion.getPanes().removeAll(mainAccordion.getPanes());
         loadData();
     }
@@ -121,13 +129,14 @@ public class MainUIController {
         generateReportButton.setDisable(true);
         editEntryButton.setDisable(true);
         deleteEntryButton.setDisable(true);
+        entryInfoText.setText("No entry selected.");
 
         Map<Integer, Map<String, Map<String, String>>> entryList = mainManager.getOverview();
         entryList.forEach( (k,v) -> addYearAccordion(k, v, mainAccordion));
     }
 
     private void addYearAccordion(Integer year, Map<String, Map<String, String>> months, Accordion accordionToPopulate) {
-        System.out.println("Entries:" + months);
+        //System.out.println("Entries:" + months);
         Accordion yearAccordion = new Accordion();
         TitledPane yearPane = new TitledPane(year.toString(), yearAccordion);
         months.forEach( (k, v) -> addMonthTitledPane(k, v, yearAccordion));
@@ -136,7 +145,7 @@ public class MainUIController {
     }
 
     private void addMonthTitledPane(String month, Map<String, String> monthEntries, Accordion accordionToPopulate) {
-        System.out.println("Entries:" + monthEntries);
+        //System.out.println("Entries:" + monthEntries);
         ObservableList<listItem> monthEntriesList = FXCollections.observableArrayList();
         final ListView<listItem> monthEntriesListView = new ListView<listItem>(monthEntriesList);
         monthEntriesListView.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -163,7 +172,7 @@ public class MainUIController {
     }
 
 
-    private Dialog<Map<String, String>> createEntryEditorDialog(List<Map<String, Integer>> currDataList){
+    private Dialog<List<Map<String, Integer>>> createEntryEditorDialog(List<Map<String, Integer>> currDataList){
         Map<String, Integer> currData = currDataList.get(0);
         Map<String, Integer> extraData = currDataList.get(1);
 
@@ -171,9 +180,9 @@ public class MainUIController {
         DecimalFormat df = new DecimalFormat("0.00");
         df.setRoundingMode(RoundingMode.HALF_UP);
 
-        Dialog<Map<String, String>> enterCompanyInfoDialog = new Dialog<>();
-        enterCompanyInfoDialog.setHeaderText("Edit entry");
-        enterCompanyInfoDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        Dialog<List<Map<String, Integer>>> editEntryDialog = new Dialog<>();
+        editEntryDialog.setHeaderText("Edit entry");
+        editEntryDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         GridPane dialogGridPane = new GridPane();
         dialogGridPane.setHgap(10);
         dialogGridPane.setVgap(10);
@@ -238,31 +247,35 @@ public class MainUIController {
                 payDayField, payMonthField, payYearField,
                 grossPayField, federalWithholdingField, stateWithholdingField,
                 medicareEmployeeWithholdingField, socialSecurityWithholdingField);
-        enterCompanyInfoDialog.getDialogPane().setContent(dialogGridPane);
+        editEntryDialog.getDialogPane().setContent(dialogGridPane);
 
-        enterCompanyInfoDialog.setResultConverter(clickedButton -> {
+        editEntryDialog.setResultConverter(clickedButton -> {
             if (clickedButton == ButtonType.OK) {
-                Map<String, String> tmpReturnMap = new HashMap<String, String>();
-                tmpReturnMap.put("Start_Day", startDayField.getText());
-                tmpReturnMap.put("Start_Month", startMonthField.getText());
-                tmpReturnMap.put("Start_Year", startYearField.getText());
-                tmpReturnMap.put("End_Day", endDayField.getText());
-                tmpReturnMap.put("End_Month", endMonthField.getText());
-                tmpReturnMap.put("End_Year", endYearField.getText());
-                tmpReturnMap.put("Pay_Day", payDayField.getText());
-                tmpReturnMap.put("Pay_Month", payMonthField.getText());
-                tmpReturnMap.put("Pay_Year", payYearField.getText());
-                tmpReturnMap.put("Gross_Pay", grossPayField.getText());
-                tmpReturnMap.put("Federal_Withholding", federalWithholdingField.getText());
-                tmpReturnMap.put("State_Withholding", stateWithholdingField.getText());
-                tmpReturnMap.put("Medicare_Employee_Withholding", medicareEmployeeWithholdingField.getText());
-                tmpReturnMap.put("Social_Security_Employee_Withholding", socialSecurityWithholdingField.getText());
+                List<Map<String, Integer>> tmpReturnMap = new ArrayList<Map<String, Integer>>();
+                Map<String, Integer> tmpDataMap = new HashMap<String, Integer>();
+                tmpDataMap.put("Start_Day", Integer.parseInt(startDayField.getText()));
+                tmpDataMap.put("Start_Month", Integer.parseInt(startMonthField.getText()));
+                tmpDataMap.put("Start_Year", Integer.parseInt(startYearField.getText()));
+                tmpDataMap.put("End_Day", Integer.parseInt(endDayField.getText()));
+                tmpDataMap.put("End_Month", Integer.parseInt(endMonthField.getText()));
+                tmpDataMap.put("End_Year", Integer.parseInt(endYearField.getText()));
+                tmpDataMap.put("Pay_Day", Integer.parseInt(payDayField.getText()));
+                tmpDataMap.put("Pay_Month", Integer.parseInt(payMonthField.getText()));
+                tmpDataMap.put("Pay_Year", Integer.parseInt(payYearField.getText())) ;
+                tmpDataMap.put("Gross_Pay", (int)Math.ceil(Double.parseDouble(grossPayField.getText()) * 100.0));
+                tmpDataMap.put("Federal_Withholding", (int)Math.ceil(Double.parseDouble(federalWithholdingField.getText()) * 100.0));
+                tmpDataMap.put("State_Withholding", (int)Math.ceil(Double.parseDouble(stateWithholdingField.getText()) * 100.0));
+                tmpDataMap.put("Medicare_Employee_Withholding", (int)Math.ceil(Double.parseDouble(medicareEmployeeWithholdingField.getText()) * 100.0));
+                tmpDataMap.put("Social_Security_Employee_Withholding", (int)Math.ceil(Double.parseDouble(socialSecurityWithholdingField.getText()) * 100.0));
+                tmpReturnMap.add(tmpDataMap);
+                tmpReturnMap.add(extraData);
+
                 return tmpReturnMap;
             }
             return null;
         });
 
-        return enterCompanyInfoDialog;
+        return editEntryDialog;
     }
 
 

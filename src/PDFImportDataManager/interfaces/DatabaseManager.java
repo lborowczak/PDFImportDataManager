@@ -24,4 +24,5 @@ public interface DatabaseManager {
     public boolean addEntry(List<Map<String, Integer>> data);
 
 
+    boolean closeDatabase();
 }

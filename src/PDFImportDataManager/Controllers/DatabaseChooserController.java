@@ -153,6 +153,7 @@ public class DatabaseChooserController {
             currStage.close();
         }
         catch (IOException e){
+            helper.notifyUser("Error loading database.");
             e.printStackTrace();
         }
     }
