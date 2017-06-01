@@ -14,6 +14,7 @@ public class ImportedDataManager {
 
     private PDFImporter managedPDFImporter = new TabulaPDFImporter();
     //private List<List<List<String>>> importedData;
+    private List<EntryData> parsedDataList;
     private List<List<Map<String, Integer>>> parsedData;
     private List<String> users;
     private List<Map<String, Integer>> userData;
@@ -94,7 +95,8 @@ public class ImportedDataManager {
 
 
     public List<Map<String, Integer>> getTotalData() {
-        return parsedData.get(parsedData.size() - 1);
+        //return parsedData.get(parsedData.size() - 1);
+        return parsedDataList.get(parsedData.size() - 1).getMapList();
     }
 
 
@@ -103,7 +105,8 @@ public class ImportedDataManager {
         //List of users, having a list of:
         //Map1: neededData, value
         //Map2: breakdownInfo, value
-        parsedData = new ArrayList<>();
+        //parsedData = new ArrayList<>();
+        parsedDataList = new ArrayList<>();
         int initialData = -1;
         int finalData = 1000;
         int grossStartIndex = -1;
@@ -175,7 +178,9 @@ public class ImportedDataManager {
 
         List<String> tmpRow = fullRows.get(initialData);
         for (int k = 0; (k < tmpRow.size() / 3); k++) {
-            parsedData.add(k, Arrays.asList(new HashMap<String, Integer>(), new HashMap<String, Integer>()));
+            //EntryData tmpData = new EntryData();
+            parsedDataList.add(k, new EntryData());
+            //parsedData.add(k, Arrays.asList(new HashMap<String, Integer>(), new HashMap<String, Integer>()));
         }
 
 
@@ -192,26 +197,32 @@ public class ImportedDataManager {
                     }
                     //If statements used because case requires constants
                     if (j >= grossStartIndex && j < grossEndIndex){
-                        parsedData.get(currUser).get(1).put(grossPayEntries.get(j - grossStartIndex), currItemValue);
+                        parsedDataList.get(currUser).setExtraData(grossPayEntries.get(j - grossStartIndex), currItemValue);
+                        //parsedData.get(currUser).get(1).put(grossPayEntries.get(j - grossStartIndex), currItemValue);
                     }
                     else if (j == grossEndIndex){
-                        parsedData.get(currUser).get(0).put("Gross_Pay", currItemValue);
+                        parsedDataList.get(currUser).setGrossPay(currItemValue);
+                        //parsedData.get(currUser).get(0).put("Gross_Pay", currItemValue);
                         //System.out.println(" ... gross total is: " + currItemValue);
                     }
                     else if (j == federalWithholdingIndex){
-                        parsedData.get(currUser).get(0).put("Federal_Withholding", currItemValue);
+                        parsedDataList.get(currUser).setFederalWithholding(currItemValue);
+                        //parsedData.get(currUser).get(0).put("Federal_Withholding", currItemValue);
                         //System.out.println(" ... F/W is: " + currItemValue);
                     }
                     else if (j == medicareEmployeeWithholdingIndex){
-                        parsedData.get(currUser).get(0).put("Medicare_Employee_Withholding", currItemValue);
+                        parsedDataList.get(currUser).setMedicareEmployeeWithholding(currItemValue);
+                        //parsedData.get(currUser).get(0).put("Medicare_Employee_Withholding", currItemValue);
                         //System.out.println(" ... Medicare is: " + currItemValue);
                     }
                     else if (j == socialSecurityWithholdingIndex){
-                        parsedData.get(currUser).get(0).put("Social_Security_Employee_Withholding", currItemValue);
+                        parsedDataList.get(currUser).setSocialSecurityEmployeeWithholding(currItemValue);
+                        //parsedData.get(currUser).get(0).put("Social_Security_Employee_Withholding", currItemValue);
                         //System.out.println(" ... Social Security is: " + currItemValue);
                     }
                     else if (j == stateWithholdingIndex){
-                        parsedData.get(currUser).get(0).put("State_Withholding", currItemValue);
+                        parsedDataList.get(currUser).setStateWithholding(currItemValue);
+                        //parsedData.get(currUser).get(0).put("State_Withholding", currItemValue);
                         //System.out.println(" ... S/W is: " + currItemValue);
                     }
                     currUser++;
@@ -221,11 +232,12 @@ public class ImportedDataManager {
             }
         }
 
-        TripleDate dates = getDates();
-        for ( List<Map<String, Integer>> user : parsedData) {
-            LocalDate startDate = dates.getBeginDate();
-            LocalDate endDate = dates.getEndDate();
-            LocalDate payDate = dates.getPayDate();
+        TripleDate extractedDate = getDates();
+
+        /*for ( List<Map<String, Integer>> user : parsedData) {
+            LocalDate startDate = extractedDate.getBeginDate();
+            LocalDate endDate = extractedDate.getEndDate();
+            LocalDate payDate = extractedDate.getPayDate();
             user.get(0).put("Start_Day", startDate.getDayOfMonth());
             user.get(0).put("Start_Month", startDate.getMonthValue());
             user.get(0).put("Start_Year", startDate.getYear());
@@ -235,6 +247,24 @@ public class ImportedDataManager {
             user.get(0).put("Pay_Day", payDate.getDayOfMonth());
             user.get(0).put("Pay_Month", payDate.getMonthValue());
             user.get(0).put("Pay_Year", payDate.getYear());
+        }
+
+        for ( EntryData user : parsedDataList) {
+            LocalDate startDate = extractedDate.getBeginDate();
+            LocalDate endDate = extractedDate.getEndDate();
+            LocalDate payDate = extractedDate.getPayDate();
+            user.setStartDay(startDate.getDayOfMonth());
+            user.setStartMonth(startDate.getMonthValue());
+            user.setStartYear(startDate.getYear());
+            user.setEndDay(endDate.getDayOfMonth());
+            user.setEndMonth(endDate.getMonthValue());
+            user.setEndYear(endDate.getYear());
+            user.setPayDay(payDate.getDayOfMonth());
+            user.setpPayMonth(payDate.getMonthValue());
+            user.setPayYear(payDate.getYear());
+        }*/
+        for ( EntryData user : parsedDataList) {
+            user.setDates(extractedDate);
         }
     }
 

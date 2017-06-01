@@ -1,5 +1,8 @@
 package PDFImportDataManager;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +13,8 @@ public class EntryData {
 
 
     public EntryData(){
-
+        mainDataMap = new HashMap<String, Integer>();
+        extraDataMap = new HashMap<String, Integer>();
     }
 
     public int getStartDay(){
@@ -144,6 +148,39 @@ public class EntryData {
     public double getSocialSecurityEmployeeWithholdingDouble() {
         int socialSecurityEmployeeWithholding = getMainMapItem("Social_Security_Employee_Withholding");
         return (double)socialSecurityEmployeeWithholding / 100.0;
+    }
+
+
+    public void setDates(TripleDate dates){
+        LocalDate startDate = dates.getBeginDate();
+        LocalDate endDate = dates.getEndDate();
+        LocalDate payDate = dates.getPayDate();
+        setStartDay(startDate.getDayOfMonth());
+        setStartMonth(startDate.getMonthValue());
+        setStartYear(startDate.getYear());
+        setEndDay(endDate.getDayOfMonth());
+        setEndMonth(endDate.getMonthValue());
+        setEndYear(endDate.getYear());
+        setPayDay(payDate.getDayOfMonth());
+        setpPayMonth(payDate.getMonthValue());
+        setPayYear(payDate.getYear());
+    }
+
+
+
+    public void setExtraData(String itemName, Integer itemAmount){
+        extraDataMap.put(itemName, itemAmount);
+    }
+    public int getExtraData(String itemName){
+        return extraDataMap.get(itemName);
+    }
+
+    //Temporary function to keep compatibility with older code
+    public List<Map<String, Integer>> getMapList(){
+        List<Map<String, Integer>> returnList = new ArrayList<Map<String, Integer>>();
+        returnList.add(mainDataMap);
+        returnList.add(extraDataMap);
+        return returnList;
     }
 
 
