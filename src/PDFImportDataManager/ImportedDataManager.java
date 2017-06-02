@@ -15,7 +15,7 @@ public class ImportedDataManager {
     private PDFImporter managedPDFImporter = new TabulaPDFImporter();
     //private List<List<List<String>>> importedData;
     private List<EntryData> parsedDataList;
-    private List<List<Map<String, Integer>>> parsedData;
+    //private List<List<Map<String, Integer>>> parsedData;
     private List<String> users;
     private List<Map<String, Integer>> userData;
 
@@ -83,20 +83,20 @@ public class ImportedDataManager {
     }
 
     public List<Map<String, Integer>> getUserData(int userIndex) {
-        if (userIndex > parsedData.size() - 1) {
+        if (userIndex > parsedDataList.size() - 1) {
             return null;
         }
-        else return parsedData.get(userIndex);
+        else return parsedDataList.get(userIndex).getMapList();
     }
 
     public int getUserCount(){
-        return (parsedData.size() - 1);
+        return (parsedDataList.size() - 1);
     }
 
 
     public List<Map<String, Integer>> getTotalData() {
         //return parsedData.get(parsedData.size() - 1);
-        return parsedDataList.get(parsedData.size() - 1).getMapList();
+        return parsedDataList.get(parsedDataList.size() - 1).getMapList();
     }
 
 
