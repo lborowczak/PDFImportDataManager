@@ -399,7 +399,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             //New object usage
             /*
             EntryData data = new EntryData();
-            
+
             //Add entry
             String addNewEntryStatementString = "INSERT INTO Entries VALUES(NULL, ?, ?, ?)";
             addNewEntryStatement = DBConnection.prepareStatement(addNewEntryStatementString);

@@ -10,11 +10,13 @@ public class EntryData {
 
     private Map<String, Integer> mainDataMap;
     private Map<String, Integer> extraDataMap;
+    private TripleDate dates;
 
 
     public EntryData(){
         mainDataMap = new HashMap<String, Integer>();
         extraDataMap = new HashMap<String, Integer>();
+
     }
 
     public int getStartDay(){
@@ -151,10 +153,10 @@ public class EntryData {
     }
 
 
-    public void setDates(TripleDate dates){
-        LocalDate startDate = dates.getBeginDate();
-        LocalDate endDate = dates.getEndDate();
-        LocalDate payDate = dates.getPayDate();
+    public void setDates(TripleDate datesToSet){
+        LocalDate startDate = datesToSet.getBeginDate();
+        LocalDate endDate = datesToSet.getEndDate();
+        LocalDate payDate = datesToSet.getPayDate();
         setStartDay(startDate.getDayOfMonth());
         setStartMonth(startDate.getMonthValue());
         setStartYear(startDate.getYear());
@@ -164,6 +166,7 @@ public class EntryData {
         setPayDay(payDate.getDayOfMonth());
         setpPayMonth(payDate.getMonthValue());
         setPayYear(payDate.getYear());
+        dates = datesToSet;
     }
 
 
@@ -181,6 +184,20 @@ public class EntryData {
         returnList.add(mainDataMap);
         returnList.add(extraDataMap);
         return returnList;
+    }
+
+    public TripleDate getTripleDate(){
+        if (dates == null){
+            generateTripleDate();
+        }
+        return dates;
+    }
+
+    private void generateTripleDate(){
+        String firstDate = getStartYear() + "-" + String.format("%02d", getStartMonth()) + "-" + String.format("%02d", getStartDay());
+        String endDate = getEndYear() + "-" + String.format("%02d", getEndMonth()) + "-" + String.format("%02d", getEndDay());
+        String payDate = getPayYear() + "-" + String.format("%02d", getPayMonth()) + "-" + String.format("%02d", getPayDay());
+        dates = new TripleDate(LocalDate.parse(firstDate), LocalDate.parse(endDate), LocalDate.parse(payDate));
     }
 
 
