@@ -201,7 +201,7 @@ public class SQLiteDatabaseManager implements DatabaseManager {
     public List<Map<String, Integer>> getEntry(String entryID) {
         Map<String, Integer> basicEntries = new HashMap<String, Integer>();
         List<Map<String, Integer>> result = new ArrayList<>();
-        EntryData resultsData = new EntryData();
+
         int entryIDInt = Integer.parseInt(entryID);
         PreparedStatement getEntryStatement = null;
         ResultSet entriesSet = null;
@@ -230,23 +230,6 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             result.add(basicEntries);
 
 
-            //entriesSet = getEntryStatement.getResultSet();
-            resultsData.setStartDay(entriesSet.getInt("Start_Day"));
-            resultsData.setStartMonth(entriesSet.getInt("Start_Month"));
-            resultsData.setStartYear(entriesSet.getInt("Start_Year"));
-            resultsData.setEndDay(entriesSet.getInt("End_Day"));
-            resultsData.setEndMonth(entriesSet.getInt("End_Month"));
-            resultsData.setEndYear(entriesSet.getInt("End_Year"));
-            resultsData.setPayDay(entriesSet.getInt("Pay_Day"));
-            resultsData.setpPayMonth(entriesSet.getInt("Pay_Month"));
-            resultsData.setPayYear(entriesSet.getInt("Pay_Year"));
-            resultsData.setGrossPay(entriesSet.getInt("Gross_Pay_In_Cents"));
-            resultsData.setFederalWithholding(entriesSet.getInt("Federal_Withholding_In_Cents"));
-            resultsData.setStateWithholding(entriesSet.getInt("State_Withholding_In_Cents"));
-            resultsData.setMedicareEmployeeWithholding(entriesSet.getInt("Medicare_Employee_Withholding_In_Cents"));
-            resultsData.setSocialSecurityEmployeeWithholding(entriesSet.getInt("Social_Security_Employee_Withholding_In_Cents"));
-
-
             //Gross_Breakdown_Info is a string that shows the breakdown of the entries that get added up into the gross total.
             //It is as follows: Entry1,Entry1Amount;Entry2,Entry2Amount; ...
             Map<String, Integer> breakdownMap = new HashMap<String, Integer>();
@@ -254,7 +237,6 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             for (String breakdownLine : breakdownInfo.split(";")) {
                 String[] lineEntries = breakdownLine.split(",");
                 breakdownMap.put(lineEntries[0], Integer.parseInt(lineEntries[1]));
-                resultsData.setExtraData(lineEntries[0], Integer.parseInt(lineEntries[1]));
             }
             result.add(breakdownMap);
         } catch (SQLException e) {
@@ -277,6 +259,67 @@ public class SQLiteDatabaseManager implements DatabaseManager {
         }
         return result;
     }
+
+    @Override
+    public EntryData getEntryData(String entryID){
+        EntryData resultsData = new EntryData();
+        int entryIDInt = Integer.parseInt(entryID);
+        PreparedStatement getEntryStatement = null;
+        ResultSet entriesSet = null;
+
+        try {
+            String statementString = "SELECT * FROM EntryData where CURR_ENTRY_ID = ?;";
+            getEntryStatement = DBConnection.prepareStatement(statementString);
+            getEntryStatement.setInt(1, entryIDInt);
+            getEntryStatement.execute();
+            entriesSet = getEntryStatement.getResultSet();
+
+            resultsData.setStartDay(entriesSet.getInt("Start_Day"));
+            resultsData.setStartMonth(entriesSet.getInt("Start_Month"));
+            resultsData.setStartYear(entriesSet.getInt("Start_Year"));
+            resultsData.setEndDay(entriesSet.getInt("End_Day"));
+            resultsData.setEndMonth(entriesSet.getInt("End_Month"));
+            resultsData.setEndYear(entriesSet.getInt("End_Year"));
+            resultsData.setPayDay(entriesSet.getInt("Pay_Day"));
+            resultsData.setpPayMonth(entriesSet.getInt("Pay_Month"));
+            resultsData.setPayYear(entriesSet.getInt("Pay_Year"));
+            resultsData.setGrossPay(entriesSet.getInt("Gross_Pay_In_Cents"));
+            resultsData.setFederalWithholding(entriesSet.getInt("Federal_Withholding_In_Cents"));
+            resultsData.setStateWithholding(entriesSet.getInt("State_Withholding_In_Cents"));
+            resultsData.setMedicareEmployeeWithholding(entriesSet.getInt("Medicare_Employee_Withholding_In_Cents"));
+            resultsData.setSocialSecurityEmployeeWithholding(entriesSet.getInt("Social_Security_Employee_Withholding_In_Cents"));
+
+
+            //Gross_Breakdown_Info is a string that shows the breakdown of the entries that get added up into the gross total.
+            //It is as follows: Entry1,Entry1Amount;Entry2,Entry2Amount; ...
+            String breakdownInfo = entriesSet.getString("Gross_Breakdown_Info");
+            for (String breakdownLine : breakdownInfo.split(";")) {
+                String[] lineEntries = breakdownLine.split(",");
+                resultsData.setExtraData(lineEntries[0], Integer.parseInt(lineEntries[1]));
+            }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    } finally {
+        if (getEntryStatement != null) {
+            try {
+                getEntryStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        if (entriesSet != null) {
+                /*try {
+                    entriesSet.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }*/
+        }
+    }
+        return resultsData;
+
+    }
+
 
     @Override
     public Map<String, String> getCompanyInfo() {
@@ -396,9 +439,44 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             returnVal = true;
 
 
-            //New object usage
-            /*
-            EntryData data = new EntryData();
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            returnVal = false;
+        } finally {
+            if (addNewEntryStatement != null) {
+                try {
+                    addEntryInfoStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (addEntryInfoStatement != null) {
+                try {
+                    addEntryInfoStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (rowID != null) {
+                try {
+                    rowID.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return returnVal;
+    }
+
+
+    @Override
+    public boolean addEntryData(EntryData data) {
+        boolean returnVal = true;
+        PreparedStatement addNewEntryStatement = null, addEntryInfoStatement = null;
+        ResultSet rowID = null;
+        try {
 
             //Add entry
             String addNewEntryStatementString = "INSERT INTO Entries VALUES(NULL, ?, ?, ?)";
@@ -422,9 +500,9 @@ public class SQLiteDatabaseManager implements DatabaseManager {
             addEntryInfoStatement.setInt(10, data.getGrossPay());
 
             //Build Gross_Breakdown_Info string for insertion into database
-            final StringBuilder grossBreakdownInfoString = new StringBuilder();
-            extraData.forEach((k, v) -> grossBreakdownInfoString.append(k + "," + v + ";"));
-            addEntryInfoStatement.setString(11, grossBreakdownInfoString.toString());
+
+            String grossBreakdownInfoString = data.getExtraDataString();
+            addEntryInfoStatement.setString(11, grossBreakdownInfoString);
 
 
             addEntryInfoStatement.setInt(12, data.getFederalWithholding());
@@ -438,7 +516,6 @@ public class SQLiteDatabaseManager implements DatabaseManager {
 
             addEntryInfoStatement.executeUpdate();
             returnVal = true;
-            */
 
 
 

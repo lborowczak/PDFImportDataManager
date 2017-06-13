@@ -1,6 +1,8 @@
 package PDFImportDataManager.interfaces;
 
 
+import PDFImportDataManager.EntryData;
+
 import java.io.File;
 import java.sql.Connection;
 import java.util.List;
@@ -19,9 +21,11 @@ public interface DatabaseManager {
     public Map<String, Integer> getEntryInfo(String entryID);
     public Map<String, String> getCompanyInfo();
     public List<Map<String, Integer>> getEntry(String entryID);
+    public EntryData getEntryData(String entryID);
     public boolean removeEntry(String entryID);
 
     public boolean addEntry(List<Map<String, Integer>> data);
+    public boolean addEntryData(EntryData data);
 
 
     boolean closeDatabase();

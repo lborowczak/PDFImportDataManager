@@ -193,6 +193,12 @@ public class EntryData {
         return dates;
     }
 
+    public String getExtraDataString() {
+        final StringBuilder extraDataString = new StringBuilder();
+        extraDataMap.forEach((k, v) -> extraDataString.append(k + "," + v + ";"));
+        return extraDataString.toString();
+    }
+
     private void generateTripleDate(){
         String firstDate = getStartYear() + "-" + String.format("%02d", getStartMonth()) + "-" + String.format("%02d", getStartDay());
         String endDate = getEndYear() + "-" + String.format("%02d", getEndMonth()) + "-" + String.format("%02d", getEndDay());
