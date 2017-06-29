@@ -1,6 +1,7 @@
 package PDFImportDataManager.ReportGenerator;
 
 
+import PDFImportDataManager.EntryData;
 import PDFImportDataManager.TripleDate;
 import PDFImportDataManager.interfaces.ReportGenerator;
 import org.apache.pdfbox.exceptions.COSVisitorException;
@@ -22,6 +23,7 @@ public class PDFReportGenerator implements ReportGenerator {
 
     private String companyName, companyEIN, companyPIN = "";
     private Map<String, Integer> entries = null;
+    private EntryData entriesData = null;
     private double totalGross, federalWithholding, stateWithholding, taxPercent, deposit = 0.0;
     private TripleDate dates = null;
 
@@ -38,6 +40,20 @@ public class PDFReportGenerator implements ReportGenerator {
         this.totalGross = totalGross;
         this.federalWithholding = federalWithholding;
         this.stateWithholding = stateWithholding;
+        this.taxPercent = taxPercent;
+        this.deposit = deposit;
+        this.dates = dates;
+    }
+    @Override
+    public void setEntryData (Map<String,String> companyInfo, EntryData reportEntryData, double deposit, double taxPercent, TripleDate dates) {
+        this.companyName = companyInfo.get("Company_Name");
+        this.companyEIN = companyInfo.get("Company_EIN");
+        this.companyPIN = companyInfo.get("Company_PIN");
+        this.entries = entries;
+        this.entriesData = reportEntryData;
+        this.totalGross = reportEntryData.getGrossPayDouble();
+        this.federalWithholding = reportEntryData.getFederalWithholdingDouble();
+        this.stateWithholding = reportEntryData.getStateWithholdingDouble();
         this.taxPercent = taxPercent;
         this.deposit = deposit;
         this.dates = dates;

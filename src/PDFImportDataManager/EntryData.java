@@ -199,6 +199,10 @@ public class EntryData {
         return extraDataString.toString();
     }
 
+    public Map<String, Integer> getExtraDataMap(){
+        return extraDataMap;
+    }
+
     private void generateTripleDate(){
         String firstDate = getStartYear() + "-" + String.format("%02d", getStartMonth()) + "-" + String.format("%02d", getStartDay());
         String endDate = getEndYear() + "-" + String.format("%02d", getEndMonth()) + "-" + String.format("%02d", getEndDay());

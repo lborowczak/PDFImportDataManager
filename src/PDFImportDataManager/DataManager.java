@@ -77,6 +77,53 @@ public class DataManager {
         return isDataCorrect;
     }
 
+    public boolean checkAmountsData(EntryData data) {
+        boolean isDataCorrect = true;
+        double checkGrossValue = 0.0;
+        double checkSocialSecurity = 0.0;
+        double checkMedicare = 0.0;
+        double checkStateWithholding = 0.0;
+        int storedGross = data.getGrossPay();
+        int storedSocialSecurity = data.getSocialSecurityEmployeeWithholding();
+        int storedMedicare = data.getMedicareEmployeeWithholding();
+        int storedFederalWithholding = data.getFederalWithholding();
+        int storedStateWithholding = data.getStateWithholding();
+
+        //Check that Social Security matches
+        checkSocialSecurity = (double)storedGross * socialSecurityPercent;
+        isDataCorrect = isDataCorrect && (Math.abs(checkSocialSecurity - (double)storedSocialSecurity) < (differenceThreshold * 100.0));
+
+        //Check that Medicare matches
+        checkMedicare = (double)storedGross * medicarePercent;
+        isDataCorrect = isDataCorrect && (Math.abs(checkMedicare - (double)storedMedicare) < (differenceThreshold * 100.0));
+
+        //Check that State Withholding matches
+        checkStateWithholding = (double)storedGross * statePercent;
+        isDataCorrect = isDataCorrect && (Math.abs(checkStateWithholding - (double)storedStateWithholding) < (differenceThreshold * 100.0));
+
+
+        //Check that deposit values match
+        double calculatedDeposit = calculateDeposit(
+                (double)storedGross / 100.0, (double)storedFederalWithholding / 100.0
+        );
+
+        double checkDepositValue = (((double)storedSocialSecurity / 100.0 * 2.0) +
+                ((double)storedMedicare / 100.0 * 2) + (double)storedFederalWithholding / 100.0);
+
+        isDataCorrect = isDataCorrect && (Math.abs(checkDepositValue - calculatedDeposit) < differenceThreshold);
+
+        //Check that custom items add up to total gross
+        for(Map.Entry<String, Integer> entry : data.getExtraDataMap().entrySet()) {
+            checkGrossValue += entry.getValue();
+        }
+        isDataCorrect = isDataCorrect && (Math.abs(checkGrossValue - storedGross) < (differenceThreshold * 100.0));
+
+
+
+        return isDataCorrect;
+    }
+
+
     public TripleDate getDates(){
         return globalImportedDataManager.getDates();
         //return dates;
@@ -94,10 +141,10 @@ public class DataManager {
         if (!globalImportedDataManager.importPDF(PDFFile)){
             return 'e';
         }
-        if (!globalDBManager.addEntry(globalImportedDataManager.getParsedData())){
+        if (!globalDBManager.addEntryData(globalImportedDataManager.getParsedEntryData())){
             return 'i';
         }
-        if (!checkAmounts(globalImportedDataManager.getParsedData())){
+        if (!checkAmountsData(globalImportedDataManager.getParsedEntryData())){
             return 'c';
         }
         return 'g';
@@ -134,6 +181,25 @@ public class DataManager {
 
         return globalReportGenerator.outputReport(PDFFile);
 
+    }
+    public boolean generateEntryDataReport(File PDFFile, String entryID){
+        EntryData reportEntryData = globalDBManager.getEntryData(entryID);
+        /*globalReportGenerator.setData(companyInfo.get("Company_Name").toString(), companyInfo.get("Company_EIN").toString(),
+                companyInfo.get("Company_PIN").toString(), reportData.get(1), (double)basicEntries.get("Gross_Pay") / 100.0,
+                (double)basicEntries.get("Federal_Withholding") / 100.0, (double)basicEntries.get("State_Withholding") / 100.0,
+                calculatedDeposit, taxPercent, dates);
+        */
+
+
+        double calculatedDeposit = calculateDeposit(reportEntryData.getGrossPayDouble(), reportEntryData.getFederalWithholdingDouble());
+        TripleDate dates = reportEntryData.getTripleDate();
+        Map<String, String> companyInfo = globalDBManager.getCompanyInfo();
+        globalReportGenerator.setEntryData(companyInfo, reportEntryData, calculatedDeposit, taxPercent, dates);
+
+
+
+        //return globalReportGenerator.outputEntryDataReport(PDFFile);
+        return false;
     }
 
     private double calculateDeposit(double grossPay, double federalWithholding){
@@ -201,6 +267,10 @@ public class DataManager {
     public void updateEntry(String entryID, List<Map<String, Integer>> newInfo) {
         globalDBManager.removeEntry(entryID);
         globalDBManager.addEntry(newInfo);
+    }
+    public void updateEntryData(String entryID, EntryData newInfo) {
+        globalDBManager.removeEntry(entryID);
+        globalDBManager.addEntryData(newInfo);
     }
 }
 

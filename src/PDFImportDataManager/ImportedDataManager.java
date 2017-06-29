@@ -99,6 +99,12 @@ public class ImportedDataManager {
         return parsedDataList.get(parsedDataList.size() - 1).getMapList();
     }
 
+    public EntryData getTotalEntryData() {
+        //return parsedData.get(parsedData.size() - 1);
+        return parsedDataList.get(parsedDataList.size() - 1);
+    }
+
+
 
     private void parseData(List<List<List<String>>> dataToParse){
 
@@ -271,5 +277,8 @@ public class ImportedDataManager {
 
     public List<Map<String, Integer>> getParsedData() {
         return getTotalData();
+    }
+    public EntryData getParsedEntryData() {
+        return getTotalEntryData();
     }
 }
