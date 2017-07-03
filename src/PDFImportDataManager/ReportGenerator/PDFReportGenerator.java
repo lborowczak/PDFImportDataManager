@@ -22,13 +22,12 @@ import java.util.Map;
 public class PDFReportGenerator implements ReportGenerator {
 
     private String companyName, companyEIN, companyPIN = "";
-    private Map<String, Integer> entries = null;
-    private EntryData entriesData = null;
+    private Map<String, Integer> extraEntries = null;
     private double totalGross, federalWithholding, stateWithholding, taxPercent, deposit = 0.0;
     private TripleDate dates = null;
 
 
-
+    //Set data for the report more explicitly
     @Override
     public void setData (String companyName, String companyEIN, String companyPIN, Map<String, Integer> entries,
                          double totalGross, double federalWithholding, double stateWithholding, double deposit, double taxPercent,
@@ -36,7 +35,7 @@ public class PDFReportGenerator implements ReportGenerator {
         this.companyName = companyName;
         this.companyEIN = companyEIN;
         this.companyPIN = companyPIN;
-        this.entries = entries;
+        this.extraEntries = entries;
         this.totalGross = totalGross;
         this.federalWithholding = federalWithholding;
         this.stateWithholding = stateWithholding;
@@ -44,13 +43,14 @@ public class PDFReportGenerator implements ReportGenerator {
         this.deposit = deposit;
         this.dates = dates;
     }
+
+    //Set data for the report using an EntryData object
     @Override
     public void setEntryData (Map<String,String> companyInfo, EntryData reportEntryData, double deposit, double taxPercent, TripleDate dates) {
         this.companyName = companyInfo.get("Company_Name");
         this.companyEIN = companyInfo.get("Company_EIN");
         this.companyPIN = companyInfo.get("Company_PIN");
-        this.entries = entries;
-        this.entriesData = reportEntryData;
+        this.extraEntries = reportEntryData.getExtraDataMap();
         this.totalGross = reportEntryData.getGrossPayDouble();
         this.federalWithholding = reportEntryData.getFederalWithholdingDouble();
         this.stateWithholding = reportEntryData.getStateWithholdingDouble();
@@ -61,7 +61,6 @@ public class PDFReportGenerator implements ReportGenerator {
 
     @Override
     public boolean outputReport(File reportFile){
-
 
         PDDocument generatedPDF = new PDDocument();
         String monthString = dates.getPayDate().minusDays(7).getMonth().toString();
@@ -108,7 +107,7 @@ public class PDFReportGenerator implements ReportGenerator {
 
             //Write custom entries
             float distanceToMove = 5.8f * PPI;
-            for (Map.Entry<String, Integer> entry : entries.entrySet()){
+            for (Map.Entry<String, Integer> entry : extraEntries.entrySet()){
                 writeText(contentStream, font, 10, entry.getKey(), 2.5f * PPI, distanceToMove);
                 writeText(contentStream, font, 10, "$" + df.format(entry.getValue() / 100.0), 3.5f * PPI, distanceToMove);
                 distanceToMove -= 0.2*PPI;

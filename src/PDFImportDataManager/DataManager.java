@@ -169,37 +169,20 @@ public class DataManager {
                 calculatedDeposit, taxPercent, dates);
 
 
-        //TODO uncomment later
-        /*
-        EntryData reportData = new EntryData();
-        /*calculatedDeposit = calculateDeposit(reportData.getGrossPayDouble(), reportData.getFederalWithholdingDouble());
-        TripleDate dates = reportData.getTripleDate();
-        Map companyInfo = globalDBManager.getCompanyInfo();
-        globalReportGenerator.setData(companyInfo, reportData, calculatedDeposit, taxPercent, dates);
-        */
-
-
         return globalReportGenerator.outputReport(PDFFile);
 
     }
     public boolean generateEntryDataReport(File PDFFile, String entryID){
         EntryData reportEntryData = globalDBManager.getEntryData(entryID);
-        /*globalReportGenerator.setData(companyInfo.get("Company_Name").toString(), companyInfo.get("Company_EIN").toString(),
-                companyInfo.get("Company_PIN").toString(), reportData.get(1), (double)basicEntries.get("Gross_Pay") / 100.0,
-                (double)basicEntries.get("Federal_Withholding") / 100.0, (double)basicEntries.get("State_Withholding") / 100.0,
-                calculatedDeposit, taxPercent, dates);
-        */
-
-
         double calculatedDeposit = calculateDeposit(reportEntryData.getGrossPayDouble(), reportEntryData.getFederalWithholdingDouble());
+
+
         TripleDate dates = reportEntryData.getTripleDate();
         Map<String, String> companyInfo = globalDBManager.getCompanyInfo();
         globalReportGenerator.setEntryData(companyInfo, reportEntryData, calculatedDeposit, taxPercent, dates);
 
+        return globalReportGenerator.outputReport(PDFFile);
 
-
-        //return globalReportGenerator.outputEntryDataReport(PDFFile);
-        return false;
     }
 
     private double calculateDeposit(double grossPay, double federalWithholding){
@@ -236,27 +219,18 @@ public class DataManager {
         DecimalFormat df = new DecimalFormat("0.00");
         df.setRoundingMode(RoundingMode.HALF_UP);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/YYYY");
-        String returnString = "";
         List<Map<String, Integer>> returnedData = globalDBManager.getEntry(entryID);
-        //EntryData returnedEntryData = globalDBManager.getEntryData(entryID); TODO uncomment later
-        //TripleDate dates = returnedEntryData.getTripleDate();
+        EntryData returnedEntryData = globalDBManager.getEntryData(entryID);
+        TripleDate dates = returnedEntryData.getTripleDate();
         Map<String, Integer> data = returnedData.get(0);
-        returnString = "Entry info:\n";
-        returnString += "Week Dates: " + data.get("Start_Month") + "/" + data.get("Start_Day") + "/" + data.get("Start_Year") + " - "
-                + data.get("End_Month") + "/" + data.get("End_Day") + "/" + data.get("End_Year") + "\n";
-        returnString += "Deposit payment date: " + data.get("Pay_Month") + "/" + data.get("Pay_Day") + "/" + data.get("Pay_Year") + "\n";
-        returnString += "Gross pay: $" + df.format(data.get("Gross_Pay") / 100.0) + "\n";
-        returnString += "F/W: $" + df.format(data.get("Federal_Withholding") / 100.0) + "\n";
-        returnString += "S/W: $" + df.format(data.get("State_Withholding") / 100.0) + "\n";
 
-        /* TODO uncomment
-        returnString = "Entry info:\n";
+
+        String returnString = "Entry info:\n";
         returnString += "Week Dates: " + dates.getBeginDate().format(formatter) + " - " + dates.getEndDate().format(formatter) + "\n";
         returnString += "Deposit payment date: " + dates.getPayDate().format(formatter) + "\n";
         returnString += "Gross pay: $" + df.format(returnedEntryData.getGrossPayDouble()) + "\n";
         returnString += "F/W: $" + df.format(returnedEntryData.getFederalWithholdingDouble()) + "\n";
         returnString += "S/W: $" + df.format(returnedEntryData.getStateWithholdingDouble()) + "\n";
-        */
         return returnString;
     }
 

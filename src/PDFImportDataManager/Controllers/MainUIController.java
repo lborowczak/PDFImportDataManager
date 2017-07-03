@@ -84,7 +84,7 @@ public class MainUIController {
             helper.notifyUser("Cannot write to this file. It may be on a write-protected device.");
             return;
         }
-        if (!mainManager.generateReport(PDFFile, currItem.getIDString())){
+        if (!mainManager.generateEntryDataReport(PDFFile, currItem.getIDString())){
             helper.notifyUser("Error occurred when generating report.");
             return;
         }
